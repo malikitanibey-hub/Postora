@@ -1,0 +1,83 @@
+/* ========================================
+   COMMENTS — THEME SUPPORT
+   ----------------------------------------
+   The app theme is driven by the class on <html>
+   (see src/App.js): "light" | "dark" | "custom".
+
+   Tailwind's `dark:` variants now follow the app theme
+   (darkMode: "class" in tailwind.config.js), so light mode
+   already renders with the base light classes and dark mode
+   keeps its `dark:` classes.
+
+   This file only covers the custom (lavender) theme.
+   ======================================== */
+
+/* Surfaces */
+html.custom .comments-section .bg-white {
+  background-color: #ffffff !important;
+}
+
+html.custom .comments-section .bg-slate-50 {
+  background-color: #f5f3ff !important;
+}
+
+html.custom .comments-section .bg-blue-50 {
+  background-color: #ede9fe !important;
+}
+
+/* Borders */
+html.custom .comments-section [class*="border-slate-"],
+html.custom .comments-section [class*="border-gray-"] {
+  border-color: #ded8f4 !important;
+}
+
+/* Text */
+html.custom .comments-section .text-slate-900,
+html.custom .comments-section .text-slate-800 {
+  color: #292344 !important;
+}
+
+html.custom .comments-section .text-slate-700 {
+  color: #373064 !important;
+}
+
+html.custom .comments-section .text-slate-500,
+html.custom .comments-section .text-slate-400 {
+  color: #77708e !important;
+}
+
+/* Hover states */
+html.custom .comments-section .hover\:bg-slate-100:hover,
+html.custom .comments-section .hover\:bg-slate-50:hover,
+html.custom .comments-section .hover\:bg-blue-50:hover {
+  background-color: #ede9fe !important;
+}
+
+html.custom .comments-section .hover\:bg-white:hover {
+  background-color: #f5f3ff !important;
+}
+
+html.custom .comments-section .hover\:bg-red-50:hover {
+  background-color: rgb(239 68 68 / 12%) !important;
+}
+
+html.custom .comments-section .hover\:text-slate-700:hover {
+  color: #373064 !important;
+}
+
+/* Add a comment / reply inputs */
+html.custom .comments-section input:not([type="checkbox"]):not([type="radio"]) {
+  background-color: #f5f3ff !important;
+  color: #292344 !important;
+  border-color: #ded8f4 !important;
+}
+
+html.custom .comments-section input::placeholder {
+  color: #77708e !important;
+}
+
+html.custom .comments-section input:focus {
+  background-color: #ffffff !important;
+  border-color: #b8aceb !important;
+  box-shadow: 0 0 0 4px #ded8f4 !important;
+}

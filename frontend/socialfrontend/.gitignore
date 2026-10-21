@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Frontend dependencies
+frontend/socialfrontend/node_modules/
+
+# Build output
+frontend/socialfrontend/build/
+frontend/socialfrontend/dist/
+build/
+dist/
+
+# Testing
+coverage/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Private keys and certificates
+*.pem
+*.key
