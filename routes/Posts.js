@@ -78,10 +78,7 @@ async function createMentionNotifications({ mentions, senderId, post, io }) {
         });
 
       if (io) {
-        io.to(`user:${userId}`).emit(
-          "notification:new",
-          populatedNotification,
-        );
+        io.to(`user:${userId}`).emit("notification:new", populatedNotification);
       }
     }
   } catch (error) {
@@ -215,25 +212,25 @@ router.post("/", authMiddleware, parsePostUpload, async (req, res) => {
       }
     }
 
-const newPost = new Post({
-  user: req.user.id,
-  text,
-  mentions,
-  image: imageUrl,
-  video: videoUrl,
-  mediaType,
-});
+    const newPost = new Post({
+      user: req.user.id,
+      text,
+      mentions,
+      image: imageUrl,
+      video: videoUrl,
+      mediaType,
+    });
 
     await newPost.save();
 
     // Create mention notifications without failing post creation
     // if the notification system encounters an error.
-await createMentionNotifications({
-  mentions: newPost.mentions,
-  senderId: req.user.id,
-  post: newPost,
-  io: req.app.get("io"),
-});
+    await createMentionNotifications({
+      mentions: newPost.mentions,
+      senderId: req.user.id,
+      post: newPost,
+      io: req.app.get("io"),
+    });
 
     return res.status(201).json(newPost);
   } catch (error) {
@@ -349,14 +346,14 @@ router.get("/saved", authMiddleware, async (req, res) => {
       (await getVisibleAuthorIds(req.user.id)).map(String),
     );
 
-    const posts = user.savedPosts
+    const posts = (user.savedPosts || [])
       .filter(Boolean)
       .filter((post) =>
         visibleAuthorIds.has(
           post.user?._id?.toString() || post.user?.toString(),
         ),
       )
-      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .reverse()
       .map((post) => ({
         ...post.toObject(),
         isLikedByUser: post.likes.some(

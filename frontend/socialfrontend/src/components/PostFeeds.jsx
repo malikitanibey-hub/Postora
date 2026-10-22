@@ -248,6 +248,7 @@ function PostFeeds({ notificationTarget, activeTab }) {
   }, []);
 
   const isDarkTheme = appearance === "dark";
+    const isCustomTheme = appearance === "custom";
 
   // Dark mode matches the "What's happening" composer exactly:
   // dark card surface with the same full border.
@@ -261,7 +262,9 @@ function PostFeeds({ notificationTarget, activeTab }) {
 
   const postSeparatorClass = isDarkTheme
     ? "border-[#343843]"
-    : "border-[var(--border)]";
+    : isCustomTheme
+      ? "border-[#ded8f4]"
+      : "border-gray-300";
 
   useEffect(() => {
     const target = notificationTarget;
@@ -705,6 +708,7 @@ function PostFeeds({ notificationTarget, activeTab }) {
             </div>
 
             <CommentsSection
+            
               postId={post._id}
               showComments={showComments[post._id] || false}
               commentsCount={commentCounts[post._id] || 0}
