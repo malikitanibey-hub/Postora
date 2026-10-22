@@ -6,6 +6,12 @@ const userSchema = new mongoose.Schema({
     type: String,
   },
 
+  bio: {
+    type: String,
+    default: "",
+    maxlength: 160,
+  },
+
   email: {
     required: true,
     type: String,

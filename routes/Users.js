@@ -400,6 +400,55 @@ router.get("/me/profile", authMiddleware, async (req, res) => {
   }
 });
 
+
+// UPDATE MY PROFILE NAME AND BIO
+router.put("/me/profile", authMiddleware, async (req, res) => {
+  try {
+    const name = req.body.name?.trim();
+    const bio = req.body.bio?.trim() ?? "";
+
+    if (!name) {
+      return res.status(400).json({
+        error: "Name is required",
+      });
+    }
+
+    if (name.length > 50) {
+      return res.status(400).json({
+        error: "Name cannot exceed 50 characters",
+      });
+    }
+
+    if (bio.length > 160) {
+      return res.status(400).json({
+        error: "Bio cannot exceed 160 characters",
+      });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.id,
+      { $set: { name, bio } },
+      { new: true, runValidators: true },
+    ).select(
+      "-password -resetPasswordCode -resetPasswordCodeExpires -resetPasswordPurpose",
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        error: "User not found",
+      });
+    }
+
+    res.json(updatedUser);
+  } catch (error) {
+    console.error("Update profile error:", error);
+
+    res.status(500).json({
+      error: "Failed to update profile",
+    });
+  }
+});
+
 // UPDATE ACCOUNT PRIVACY
 router.put("/me/privacy", authMiddleware, async (req, res) => {
   try {
@@ -814,7 +863,7 @@ router.delete("/me", authMiddleware, async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select(
-      "name avatar isPrivate createdAt",
+      "name bio avatar isPrivate createdAt",
     );
 
     if (!user) {
@@ -854,6 +903,7 @@ router.get("/:id", async (req, res) => {
     return res.json({
       _id: user._id,
       name: user.name,
+      bio: user.bio || "",
       avatar: user.avatar,
       isPrivate: Boolean(user.isPrivate),
       createdAt: user.createdAt,

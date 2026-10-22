@@ -46,7 +46,6 @@ export async function logoutApi() {
 }
 
 //GET ME
-
 export async function getMeApi() {
   const res = await fetch(`${API}/me/profile`, {
     credentials: "include",
@@ -60,6 +59,27 @@ export async function getMeApi() {
 
   if (!res.ok) {
     throw new Error(data.error || "Failed to get user");
+  }
+
+  return data;
+}
+
+
+// UPDATE MY PROFILE
+export async function updateMyProfile(payload) {
+  const res = await fetch(`${API}/me/profile`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify(payload),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    throw new Error(data.error || "Failed to update profile");
   }
 
   return data;
