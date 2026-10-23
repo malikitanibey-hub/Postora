@@ -58,8 +58,8 @@ function Search() {
     const handleThemeChange = (event) => {
       setAppearance(
         event.detail?.appearance ||
-          localStorage.getItem("postoraAppearance") ||
-          "light",
+        localStorage.getItem("postoraAppearance") ||
+        "light",
       );
     };
 
@@ -344,10 +344,10 @@ function Search() {
         prev.map((post) =>
           post._id === postId
             ? {
-                ...post,
-                isLikedByUser: data.liked,
-                likes: Array(data.likesCount).fill(null),
-              }
+              ...post,
+              isLikedByUser: data.liked,
+              likes: Array(data.likesCount).fill(null),
+            }
             : post,
         ),
       );
@@ -472,13 +472,12 @@ function Search() {
               <span className="invisible absolute left-0 top-full z-50 pt-2 opacity-0 transition-opacity duration-150 group-hover/mention:visible group-hover/mention:opacity-100 group-focus-within/mention:visible group-focus-within/mention:opacity-100">
                 <Link
                   to={profileUrl}
-                  className={`flex w-56 items-center gap-3 rounded-xl border p-3 text-left shadow-xl ${
-                    isDarkTheme
+                  className={`flex w-56 items-center gap-3 rounded-xl border p-3 text-left shadow-xl ${isDarkTheme
                       ? "border-[#343843] bg-[#1b1e25]"
                       : isCustomTheme
                         ? "border-[#ded8f4] bg-white"
                         : "border-gray-200 bg-white"
-                  }`}
+                    }`}
                 >
                   <img
                     src={person.avatar || "/avatar.png"}
@@ -550,13 +549,12 @@ function Search() {
               type="button"
               onClick={() => setQuery("")}
               aria-label="Clear search"
-              className={`rounded-full p-1 transition ${
-                isDarkTheme
+              className={`rounded-full p-1 transition ${isDarkTheme
                   ? "text-gray-400 hover:bg-[#343843] hover:text-white"
                   : isCustomTheme
                     ? "text-[#77708e] hover:bg-[#ede9fe]"
                     : "text-gray-400 hover:bg-gray-200 hover:text-gray-700"
-              }`}
+                }`}
             >
               <X size={18} />
             </button>
@@ -567,9 +565,8 @@ function Search() {
           <button
             type="button"
             onClick={() => setActiveTab("people")}
-            className={`flex items-center justify-center gap-2 rounded-lg px-3 py-3 text-sm font-semibold transition ${
-              activeTab === "people" ? activeTabClass : inactiveTabClass
-            }`}
+            className={`flex items-center justify-center gap-2 rounded-lg px-3 py-3 text-sm font-semibold transition ${activeTab === "people" ? activeTabClass : inactiveTabClass
+              }`}
           >
             <Users size={18} />
             People
@@ -578,9 +575,8 @@ function Search() {
           <button
             type="button"
             onClick={() => setActiveTab("posts")}
-            className={`flex items-center justify-center gap-2 rounded-lg px-3 py-3 text-sm font-semibold transition ${
-              activeTab === "posts" ? activeTabClass : inactiveTabClass
-            }`}
+            className={`flex items-center justify-center gap-2 rounded-lg px-3 py-3 text-sm font-semibold transition ${activeTab === "posts" ? activeTabClass : inactiveTabClass
+              }`}
           >
             <FileText size={18} />
             Posts
@@ -608,9 +604,51 @@ function Search() {
             </p>
           </div>
         ) : loading ? (
-          <div className={`flex flex-col items-center py-16 ${emptyTextClass}`}>
-            <LoaderCircle size={30} className="animate-spin text-[#2764de]" />
-            <p className="mt-3 text-sm">Searching...</p>
+          <div
+            className={`flex min-h-[60vh] w-full flex-col items-center justify-center gap-6 px-4 ${isDarkTheme
+                ? "bg-[#111318]"
+                : isCustomTheme
+                  ? "bg-[#f5f3ff]"
+                  : "bg-gray-50"
+              }`}
+            role="status"
+            aria-live="polite"
+            aria-label="Loading profile"
+          >
+            <img
+              src={isDarkTheme ? "/logo.png" : "/logo-1.png"}
+              alt="Postora"
+              className="h-auto w-36 max-w-[55vw] object-contain sm:w-44"
+            />
+
+            <div className="relative flex h-10 w-10 items-center justify-center">
+              <span
+                className={`absolute inset-0 rounded-full border-[3px] ${isDarkTheme
+                    ? "border-[#343843]"
+                    : isCustomTheme
+                      ? "border-[#ded8f4]"
+                      : "border-gray-200"
+                  }`}
+              />
+
+              <span
+                className={`absolute inset-0 animate-spin rounded-full border-[3px] border-transparent ${isCustomTheme
+                    ? "border-t-[#6554c0]"
+                    : "border-t-[#2764de]"
+                  }`}
+              />
+            </div>
+
+            <span
+              className={`text-sm font-medium tracking-wide ${isDarkTheme
+                  ? "text-[#9ca3af]"
+                  : isCustomTheme
+                    ? "text-[#77718f]"
+                    : "text-gray-500"
+                }`}
+            >
+              Searching...
+            </span>
           </div>
         ) : error ? (
           <div className="py-14 text-center">
@@ -629,13 +667,12 @@ function Search() {
               {users.map((person) => (
                 <div
                   key={person._id}
-                  className={`flex items-center gap-3 rounded-xl px-2 py-4 transition ${
-                    isDarkTheme
+                  className={`flex items-center gap-3 rounded-xl px-2 py-4 transition ${isDarkTheme
                       ? "hover:bg-[#1b1e25]"
                       : isCustomTheme
                         ? "hover:bg-[#ede9fe]"
                         : "hover:bg-blue-50"
-                  }`}
+                    }`}
                 >
                   <button
                     type="button"
@@ -663,15 +700,14 @@ function Search() {
                       type="button"
                       disabled={!!followLoading[person._id]}
                       onClick={() => handleFollowToggle(person)}
-                      className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-sm font-semibold transition disabled:opacity-50 ${
-                        followStatuses[person._id]
+                      className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-sm font-semibold transition disabled:opacity-50 ${followStatuses[person._id]
                           ? isDarkTheme
                             ? "border-[#343843] bg-[#1b1e25] text-gray-200 hover:text-red-400"
                             : isCustomTheme
                               ? "border-[#ded8f4] bg-white text-[#292344] hover:text-red-600"
                               : "border-gray-200 bg-white text-gray-700 hover:border-red-200 hover:text-red-600"
                           : "border-[#2764de] bg-[#2764de] text-white hover:bg-blue-700"
-                      }`}
+                        }`}
                     >
                       {followStatuses[person._id] ? (
                         <UserCheck size={16} />
@@ -743,15 +779,14 @@ function Search() {
                           type="button"
                           disabled={!!followLoading[post.user._id]}
                           onClick={() => handleFollowToggle(post.user)}
-                          className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition disabled:opacity-50 sm:px-4 sm:py-2 ${
-                            followStatuses[post.user._id]
+                          className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition disabled:opacity-50 sm:px-4 sm:py-2 ${followStatuses[post.user._id]
                               ? isDarkTheme
                                 ? "border border-[#343843] bg-[#1b1e25] text-gray-100 hover:bg-[#292d36]"
                                 : isCustomTheme
                                   ? "border border-[#ded8f4] bg-white text-[#292344] hover:bg-[#f0edfa]"
                                   : "border border-gray-200 text-gray-700 hover:bg-gray-50"
                               : "bg-[#2764de] text-white hover:bg-blue-700"
-                          }`}
+                            }`}
                         >
                           {followStatuses[post.user._id] ? (
                             <UserCheck size={15} />
@@ -804,11 +839,10 @@ function Search() {
                         type="button"
                         disabled={!!likingPosts[post._id]}
                         onClick={() => handleLike(post._id)}
-                        className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-3 py-2 transition-colors disabled:opacity-50 ${
-                          post.isLikedByUser
+                        className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-3 py-2 transition-colors disabled:opacity-50 ${post.isLikedByUser
                             ? "text-red-500"
                             : `${actionTextClass} hover:bg-red-50 hover:text-red-500`
-                        }`}
+                          }`}
                       >
                         <Heart
                           size={20}
@@ -825,11 +859,10 @@ function Search() {
                             [post._id]: !prev[post._id],
                           }))
                         }
-                        className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-3 py-2 transition-colors ${
-                          showComments[post._id]
+                        className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-3 py-2 transition-colors ${showComments[post._id]
                             ? "bg-[#2764de]/10 text-[#2764de]"
                             : `${actionTextClass} hover:bg-[#2764de]/10 hover:text-[#2764de]`
-                        }`}
+                          }`}
                       >
                         <MessageCircle size={20} />
                         <span>{commentCounts[post._id] || 0}</span>
@@ -839,15 +872,14 @@ function Search() {
                         type="button"
                         disabled={!!savingPosts[post._id]}
                         onClick={() => handleSavePost(post._id)}
-                        className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-3 py-2 transition-colors disabled:opacity-50 ${
-                          post.isSavedByUser
+                        className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-3 py-2 transition-colors disabled:opacity-50 ${post.isSavedByUser
                             ? isDarkTheme
                               ? "text-[#7da5ff]"
                               : isCustomTheme
                                 ? "text-[#6554c0]"
                                 : "text-[#2764de]"
                             : `${actionTextClass} hover:bg-[#2764de]/10 hover:text-[#2764de]`
-                        }`}
+                          }`}
                         aria-label={post.isSavedByUser ? "Unsave post" : "Save post"}
                       >
                         <Bookmark

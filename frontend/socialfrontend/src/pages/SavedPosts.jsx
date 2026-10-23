@@ -443,14 +443,59 @@ function SavedPosts() {
   };
 
   if (loading) {
-    return (
-      <div
-        className={`flex min-h-[60vh] items-center justify-center ${pageBackgroundClass}`}
-      >
-        <div className="h-10 w-10 animate-spin rounded-full border-4 border-gray-300 border-t-[#2764de]" />
+  return (
+    <div
+      className={`flex min-h-[60vh] w-full flex-col items-center justify-center gap-6 px-4 ${
+        isDarkTheme
+          ? "bg-[#111318]"
+          : isCustomTheme
+            ? "bg-[#f5f3ff]"
+            : "bg-gray-50"
+      }`}
+      role="status"
+      aria-live="polite"
+      aria-label="Loading profile"
+    >
+      <img
+        src={isDarkTheme ? "/logo.png" : "/logo-1.png"}
+        alt="Postora"
+        className="h-auto w-36 max-w-[55vw] object-contain sm:w-44"
+      />
+
+      <div className="relative flex h-10 w-10 items-center justify-center">
+        <span
+          className={`absolute inset-0 rounded-full border-[3px] ${
+            isDarkTheme
+              ? "border-[#343843]"
+              : isCustomTheme
+                ? "border-[#ded8f4]"
+                : "border-gray-200"
+          }`}
+        />
+
+        <span
+          className={`absolute inset-0 animate-spin rounded-full border-[3px] border-transparent ${
+            isCustomTheme
+              ? "border-t-[#6554c0]"
+              : "border-t-[#2764de]"
+          }`}
+        />
       </div>
-    );
-  }
+
+      <span
+        className={`text-sm font-medium tracking-wide ${
+          isDarkTheme
+            ? "text-[#9ca3af]"
+            : isCustomTheme
+              ? "text-[#77718f]"
+              : "text-gray-500"
+        }`}
+      >
+        Loading Saved Posts...
+      </span>
+    </div>
+  );
+}
 
   return (
     <div

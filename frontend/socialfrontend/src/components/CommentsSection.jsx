@@ -879,55 +879,55 @@ function CommentsSection({
         {renderMentionSuggestions(inputKey)}
 
 
-{showReplyEmoji[inputKey] && (
-  <div className="absolute bottom-14 left-0 z-40 max-w-[calc(100vw-2rem)]">
-    <div className="overflow-hidden rounded-xl shadow-xl">
-      <EmojiPicker
-        onEmojiClick={(emojiData) => {
-          setReplyText((prev) => ({
-            ...prev,
-            [inputKey]: (prev[inputKey] || "") + emojiData.emoji,
-          }));
-        }}
-        width={300}
-        height={350}
-      />
+        {showReplyEmoji[inputKey] && (
+          <div className="absolute bottom-14 left-0 z-40 max-w-[calc(100vw-2rem)]">
+            <div className="overflow-hidden rounded-xl shadow-xl">
+              <EmojiPicker
+                onEmojiClick={(emojiData) => {
+                  setReplyText((prev) => ({
+                    ...prev,
+                    [inputKey]: (prev[inputKey] || "") + emojiData.emoji,
+                  }));
+                }}
+                width={300}
+                height={350}
+              />
 
-      <div className="flex justify-end border-t border-gray-200 bg-white px-3 py-2">
-        <button
-          type="button"
-          onClick={() => {
-            setReplyText((prev) => {
-              const text = prev[inputKey] || "";
-              if (!text) return prev;
+              <div className="flex justify-end border-t border-gray-200 bg-white px-3 py-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setReplyText((prev) => {
+                      const text = prev[inputKey] || "";
+                      if (!text) return prev;
 
-              const segmenter = new Intl.Segmenter(undefined, {
-                granularity: "grapheme",
-              });
+                      const segmenter = new Intl.Segmenter(undefined, {
+                        granularity: "grapheme",
+                      });
 
-              const characters = Array.from(
-                segmenter.segment(text),
-                (item) => item.segment
-              );
+                      const characters = Array.from(
+                        segmenter.segment(text),
+                        (item) => item.segment
+                      );
 
-              characters.pop();
+                      characters.pop();
 
-              return {
-                ...prev,
-                [inputKey]: characters.join(""),
-              };
-            });
-          }}
-          title="Remove last character"
-          aria-label="Remove last character from reply"
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-700 transition hover:bg-gray-100"
-        >
-          <X size={17} />
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+                      return {
+                        ...prev,
+                        [inputKey]: characters.join(""),
+                      };
+                    });
+                  }}
+                  title="Remove last character"
+                  aria-label="Remove last character from reply"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-700 transition hover:bg-gray-100"
+                >
+                  <X size={17} />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
 
         <div className="flex min-w-0 items-center gap-2">
@@ -1198,47 +1198,47 @@ function CommentsSection({
           <div className="relative">
             {renderMentionSuggestions("comment")}
 
-{showCommentEmoji && (
-  <div className="absolute bottom-14 left-0 z-40">
-    <div className="overflow-hidden rounded-xl shadow-xl">
-      <EmojiPicker
-        onEmojiClick={(emojiData) =>
-          setCommentText((prev) => prev + emojiData.emoji)
-        }
-        width={300}
-        height={350}
-      />
+            {showCommentEmoji && (
+              <div className="absolute bottom-14 left-0 z-40">
+                <div className="overflow-hidden rounded-xl shadow-xl">
+                  <EmojiPicker
+                    onEmojiClick={(emojiData) =>
+                      setCommentText((prev) => prev + emojiData.emoji)
+                    }
+                    width={300}
+                    height={350}
+                  />
 
-      <div className="flex justify-end border-t border-gray-200 bg-white px-3 py-2">
-        <button
-          type="button"
-          onClick={() => {
-            setCommentText((previous) => {
-              if (!previous) return previous;
+                  <div className="flex justify-end border-t border-gray-200 bg-white px-3 py-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCommentText((previous) => {
+                          if (!previous) return previous;
 
-              const segmenter = new Intl.Segmenter(undefined, {
-                granularity: "grapheme",
-              });
+                          const segmenter = new Intl.Segmenter(undefined, {
+                            granularity: "grapheme",
+                          });
 
-              const characters = Array.from(
-                segmenter.segment(previous),
-                (item) => item.segment
-              );
+                          const characters = Array.from(
+                            segmenter.segment(previous),
+                            (item) => item.segment
+                          );
 
-              characters.pop();
-              return characters.join("");
-            });
-          }}
-          title="Remove last character"
-          aria-label="Remove last character from comment"
-          className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-700 transition hover:bg-gray-100"
-        >
-          <X size={17} />
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+                          characters.pop();
+                          return characters.join("");
+                        });
+                      }}
+                      title="Remove last character"
+                      aria-label="Remove last character from comment"
+                      className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-700 transition hover:bg-gray-100"
+                    >
+                      <X size={17} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
 
             <div className="flex min-w-0 items-center gap-2">

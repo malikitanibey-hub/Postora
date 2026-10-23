@@ -695,24 +695,73 @@ function Profile() {
     return parts;
   };
 
-  if (loading) {
-    return (
-      <div className="flex h-40 items-center justify-center">
-        <LoaderCircle className="h-9 w-9 animate-spin text-[#2764de]" />
-      </div>
-    );
-  }
+if (loading) {
+  return (
+    <div
+      className={`flex min-h-[60vh] w-full flex-col items-center justify-center gap-6 px-4 ${
+        isDarkTheme
+          ? "bg-[#111318]"
+          : isCustomTheme
+            ? "bg-[#f5f3ff]"
+            : "bg-gray-50"
+      }`}
+      role="status"
+      aria-live="polite"
+      aria-label="Loading profile"
+    >
+      <img
+        src={isDarkTheme ? "/logo.png" : "/logo-1.png"}
+        alt="Postora"
+        className="h-auto w-36 max-w-[55vw] object-contain sm:w-44"
+      />
 
-  if (!profile) {
-    return (
-      <div className={`mx-auto max-w-2xl px-4 py-16 text-center ${pageClass}`}>
-        <p className="text-lg font-semibold">Profile unavailable</p>
-        <p className={`mt-2 text-sm ${bodyClass}`}>
-          We couldn't load your profile.
-        </p>
+      <div className="relative flex h-10 w-10 items-center justify-center">
+        <span
+          className={`absolute inset-0 rounded-full border-[3px] ${
+            isDarkTheme
+              ? "border-[#343843]"
+              : isCustomTheme
+                ? "border-[#ded8f4]"
+                : "border-gray-200"
+          }`}
+        />
+
+        <span
+          className={`absolute inset-0 animate-spin rounded-full border-[3px] border-transparent ${
+            isCustomTheme
+              ? "border-t-[#6554c0]"
+              : "border-t-[#2764de]"
+          }`}
+        />
       </div>
-    );
-  }
+
+      <span
+        className={`text-sm font-medium tracking-wide ${
+          isDarkTheme
+            ? "text-[#9ca3af]"
+            : isCustomTheme
+              ? "text-[#77718f]"
+              : "text-gray-500"
+        }`}
+      >
+        Loading profile...
+      </span>
+    </div>
+  );
+}
+
+if (!profile) {
+  return (
+    <div
+      className={`mx-auto max-w-2xl px-4 py-16 text-center ${pageClass}`}
+    >
+      <p className="text-lg font-semibold">Profile unavailable</p>
+      <p className={`mt-2 text-sm ${bodyClass}`}>
+        We couldn't load your profile.
+      </p>
+    </div>
+  );
+}
 
   const sortedPosts = [...(optimisticPosts || [])].sort(
     (a, b) => new Date(b.createdAt) - new Date(a.createdAt)

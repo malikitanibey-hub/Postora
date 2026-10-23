@@ -7,7 +7,6 @@ import React, {
 } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../api/authContext/UserContext";
-// import { getMeApi, updateMyAvatar  } from "../api/auth";
 import { deletePost, getPostsByUser, toggleSavePost } from "../api/posts";
 import {
   Heart,
@@ -17,11 +16,11 @@ import {
   UserPlus,
   UserCheck,
   Lock,
+  Send,
 } from "lucide-react";
 import { toast } from "sonner";
 import WhatHappening from "../components/WhatHappening";
-import AvatarUploader from "../components/AvatarUploader";
-import { getUserProfile, updateMyAvatar, removeMyAvatar } from "../api/auth";
+import { getUserProfile } from "../api/auth";
 import CommentsSection from "../components/CommentsSection";
 import { getCommentCount } from "../api/comments";
 import ImageViewer from "../components/ImageViewer";
@@ -39,9 +38,57 @@ import { Link } from "react-router-dom";
 function UserDetails() {
   const { id } = useParams();
   const { user } = useAuth();
+
+  const [appearance, setAppearance] = useState(
+    () => localStorage.getItem("postoraAppearance") || "light",
+  );
+
+  useEffect(() => {
+    const syncAppearance = () => {
+      setAppearance(localStorage.getItem("postoraAppearance") || "light");
+    };
+    window.addEventListener("postora-theme-change", syncAppearance);
+    window.addEventListener("storage", syncAppearance);
+    return () => {
+      window.removeEventListener("postora-theme-change", syncAppearance);
+      window.removeEventListener("storage", syncAppearance);
+    };
+  }, []);
+
+  const isDarkTheme = appearance === "dark";
+  const isCustomTheme = appearance === "custom";
+  const panelClass = isDarkTheme
+    ? "border-[#343843] bg-[#1b1e25] text-[#f3f4f6]"
+    : isCustomTheme
+      ? "border-[#ded8f4] bg-white text-[#292342]"
+      : "border-gray-200 bg-white text-gray-900";
+  const headingClass = isDarkTheme
+    ? "text-[#f3f4f6]"
+    : isCustomTheme
+      ? "text-[#292342]"
+      : "text-gray-900";
+  const bodyClass = isDarkTheme
+    ? "text-[#d1d5db]"
+    : isCustomTheme
+      ? "text-[#494365]"
+      : "text-gray-800";
+  const mutedClass = isDarkTheme
+    ? "text-[#9ca3af]"
+    : isCustomTheme
+      ? "text-[#77718f]"
+      : "text-gray-500";
+  const borderClass = isDarkTheme
+    ? "border-[#343843]"
+    : isCustomTheme
+      ? "border-[#ded8f4]"
+      : "border-gray-200";
+  const hoverClass = isDarkTheme
+    ? "hover:bg-[#272b34]"
+    : isCustomTheme
+      ? "hover:bg-[#f0edfc]"
+      : "hover:bg-gray-100";
   const [profile, setProfile] = useState(null);
   const [posts, setPosts] = useState([]);
-  const [showRemoveModal, setShowRemoveModal] = useState(false);
   const [expandedPosts, setExpandedPosts] = useState({});
   const [showComments, setShowComments] = useState({});
   const [commentCounts, setCommentCounts] = useState({});
@@ -227,36 +274,6 @@ function UserDetails() {
     toast.success("Post Deleted Successfully");
   }, []);
 
-  const handleAvatarUploaded = async (file) => {
-    try {
-      toast.loading("Uploading Avatar...");
-      const updatedUser = await updateMyAvatar(profile._id, file);
-      // setProfile((prev) => (prev ? { ...prev, avatar: url } : prev));
-      setProfile(updatedUser);
-      toast.success("Avatar Updated");
-    } catch (error) {
-      toast.error(error.message || "Failed to save avatar");
-    } finally {
-      toast.dismiss();
-    }
-  };
-
-  const handleRemoveAvatar = async () => {
-    try {
-      toast.loading("Removing Avatar...");
-
-      const updatedUser = await removeMyAvatar(profile._id);
-
-      setProfile(updatedUser);
-
-      toast.success("Avatar Removed");
-    } catch (error) {
-      toast.error(error.message || "Failed to remove avatar");
-    } finally {
-      toast.dismiss();
-    }
-  };
-
   useEffect(() => {
     if (!id || !user) return;
 
@@ -390,6 +407,10 @@ function UserDetails() {
     }
   };
 
+  const handleMessageClick = () => {
+    toast.info("Messaging will be available soon.");
+  };
+
   const renderPostText = (content, mentions = []) => {
     if (!content) return content;
 
@@ -452,7 +473,7 @@ function UserDetails() {
               <span className="invisible absolute left-0 top-full z-50 pt-2 opacity-0 transition-opacity duration-150 group-hover/mention:visible group-hover/mention:opacity-100 group-focus-within/mention:visible group-focus-within/mention:opacity-100">
                 <Link
                   to={profileUrl}
-                  className="flex w-56 items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 text-left shadow-xl"
+                  className={`flex w-56 items-center gap-3 rounded-xl border ${borderClass} ${panelClass} p-3 text-left shadow-xl`}
                 >
                   <img
                     src={person.avatar || "/avatar.png"}
@@ -461,7 +482,7 @@ function UserDetails() {
                   />
 
                   <span className="min-w-0">
-                    <span className="block truncate text-sm font-semibold text-gray-900">
+                    <span className={`block truncate text-sm font-semibold ${headingClass}`}>
                       {person.name || mentionText.slice(1)}
                     </span>
 
@@ -489,9 +510,54 @@ function UserDetails() {
 
   if (!profile) {
     return (
-      // <div className="p-6 mt-10">Loading...</div>
-      <div className="flex items-center justify-center h-40">
-        <div className="w-10 h-10 border-t-primary border-4 border-gray-300 rounded-full animate-spin"></div>
+      <div
+        className={`flex min-h-[60vh] w-full flex-col items-center justify-center gap-6 px-4 ${
+          isDarkTheme
+            ? "bg-[#111318]"
+            : isCustomTheme
+              ? "bg-[#f5f3ff]"
+              : "bg-gray-50"
+        }`}
+        role="status"
+        aria-live="polite"
+        aria-label="Loading profile"
+      >
+        <img
+          src={isDarkTheme ? "/logo.png" : "/logo-1.png"}
+          alt="Postora"
+          className="h-auto w-36 max-w-[55vw] object-contain sm:w-44"
+        />
+
+        <div className="relative flex h-10 w-10 items-center justify-center">
+          <span
+            className={`absolute inset-0 rounded-full border-[3px] ${
+              isDarkTheme
+                ? "border-[#343843]"
+                : isCustomTheme
+                  ? "border-[#ded8f4]"
+                  : "border-gray-200"
+            }`}
+          />
+          <span
+            className={`absolute inset-0 animate-spin rounded-full border-[3px] border-transparent ${
+              isCustomTheme
+                ? "border-t-[#6554c0]"
+                : "border-t-[#2764de]"
+            }`}
+          />
+        </div>
+
+        <span
+          className={`text-sm font-medium tracking-wide ${
+            isDarkTheme
+              ? "text-[#9ca3af]"
+              : isCustomTheme
+                ? "text-[#77718f]"
+                : "text-gray-500"
+          }`}
+        >
+          Loading profile...
+        </span>
       </div>
     );
   }
@@ -532,122 +598,130 @@ function UserDetails() {
       <WhatHappening />
 
       {/* Profile Header */}
-      <div className="mt-6 sm:mt-8 rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 shadow-sm">
-        <div className="flex items-center gap-4 sm:gap-5">
-          <AvatarUploader
-            src={profile?.avatar}
-            size={72}
-            disabled={!isOwner}
-            onUpload={handleAvatarUploaded}
-            onRemove={() => setShowRemoveModal(true)}
-          />
-
-          <div className="min-w-0">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 truncate">
-              {profile?.name}
-            </h1>
-
-            <span className="block mt-1 text-sm sm:text-base text-gray-500 truncate">
-              {profile?.email}
-            </span>
+      <section className={`mt-6 sm:mt-8 rounded-2xl border p-4 sm:p-6 shadow-sm ${panelClass}`}>
+        <div className="flex flex-col gap-5">
+          <div className="flex items-start gap-4 sm:gap-5">
+            <img
+              src={profile?.avatar || "/avatar.png"}
+              alt={profile?.name || "User"}
+              className="h-[72px] w-[72px] shrink-0 rounded-full object-cover"
+            />
+            <div className="min-w-0 flex-1">
+              <h1 className={`truncate text-xl sm:text-2xl font-bold ${headingClass}`}>
+                {profile?.name}
+              </h1>
+              <span className={`mt-1 block truncate text-sm sm:text-base ${mutedClass}`}>
+                {profile?.email}
+              </span>
+              <p className={`mt-3 whitespace-pre-wrap break-words text-sm sm:text-base ${profile?.bio ? bodyClass : mutedClass}`}>
+                {profile?.bio || "No bio yet."}
+              </p>
+              {profile?.isPrivate && (
+                <span className={`mt-3 inline-flex items-center gap-1.5 text-xs font-medium ${mutedClass}`}>
+                  <Lock size={14} />
+                  Private account
+                </span>
+              )}
+            </div>
           </div>
 
-          {/* Follow Stats */}
-          <div className="mt-5 flex items-center gap-6 text-sm">
+          <div className="flex flex-wrap items-center gap-5 text-sm">
             <p>
-              <span className="font-bold text-gray-900">
-                {followStatus.followersCount}
+              <span className={`font-bold ${headingClass}`}>
+                {profile?.postsCount ?? profile?.postCount ?? posts.length}
               </span>{" "}
-              <span className="text-gray-500">Followers</span>
+              <span className={mutedClass}>Posts</span>
             </p>
-
             <p>
-              <span className="font-bold text-gray-900">
-                {followStatus.followingCount}
-              </span>{" "}
-              <span className="text-gray-500">Following</span>
+              <span className={`font-bold ${headingClass}`}>{followStatus.followersCount}</span>{" "}
+              <span className={mutedClass}>Followers</span>
+            </p>
+            <p>
+              <span className={`font-bold ${headingClass}`}>{followStatus.followingCount}</span>{" "}
+              <span className={mutedClass}>Following</span>
             </p>
           </div>
 
+          {user && !isOwner && (
+            <div className="flex flex-wrap items-center gap-2">
+              {pendingFollowRequest ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleAcceptFollowRequest}
+                    disabled={requestActionLoading}
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-[#2764de] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <UserCheck size={18} />
+                    {requestActionLoading ? "Please wait..." : "Accept"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleRejectFollowRequest}
+                    disabled={requestActionLoading}
+                    className={`inline-flex items-center justify-center rounded-full border px-4 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${borderClass} ${hoverClass} ${bodyClass}`}
+                  >
+                    Reject
+                  </button>
+                </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleFollowToggle}
+                  disabled={followLoading}
+                  className={`inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
+                    followStatus.isFollowing
+                      ? `border ${borderClass} ${panelClass} ${hoverClass}`
+                      : "bg-[#2764de] text-white hover:bg-blue-700"
+                  }`}
+                >
+                  {followStatus.isFollowing ? <UserCheck size={18} /> : <UserPlus size={18} />}
+                  {followLoading
+                    ? "Please wait..."
+                    : followStatus.isFollowing
+                      ? "Following"
+                      : followStatus.requestPending
+                        ? "Requested · Cancel"
+                        : followStatus.followsYou
+                          ? "Follow back"
+                          : "Follow"}
+                </button>
+              )}
 
-          {/* Follow / Requested / Following Button */}
-          {/* Incoming Request: Accept or Reject */}
-          {user && !isOwner && pendingFollowRequest ? (
-            <div className="mt-4 flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                onClick={handleAcceptFollowRequest}
-                disabled={requestActionLoading}
-                className="inline-flex items-center gap-2 rounded-full bg-[#2764de] px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                onClick={handleMessageClick}
+                className={`inline-flex items-center justify-center gap-2 rounded-full border px-5 py-2.5 text-sm font-semibold transition ${borderClass} ${bodyClass} ${hoverClass}`}
               >
-                <UserCheck size={18} />
-                {requestActionLoading ? "Please wait..." : "Accept"}
-              </button>
-
-              <button
-                type="button"
-                onClick={handleRejectFollowRequest}
-                disabled={requestActionLoading}
-                className="rounded-full border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 disabled:opacity-50"
-              >
-                Reject
+                <Send size={17} />
+                Message
               </button>
             </div>
-          ) : (
-            user &&
-            !isOwner && (
-              <button
-                type="button"
-                onClick={handleFollowToggle}
-                disabled={followLoading}
-                className={`mt-4 inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${followStatus.isFollowing
-                  ? "border border-gray-300 bg-white text-gray-700 hover:bg-gray-100"
-                  : "bg-[#2764de] text-white hover:bg-blue-700"
-                  }`}
-              >
-                {followStatus.isFollowing ? (
-                  <UserCheck size={18} />
-                ) : (
-                  <UserPlus size={18} />
-                )}
-
-                {followLoading
-                  ? "Please wait..."
-                  : followStatus.isFollowing
-                    ? "Following"
-                    : followStatus.requestPending
-                      ? "Requested · Cancel"
-                      : followStatus.followsYou
-                        ? "Follow back"
-                        : "Follow"}
-              </button>
-            )
           )}
-
         </div>
-      </div>
+      </section>
 
       {/* Divider */}
       <div className="my-6 sm:my-8">
         <div className="flex items-center gap-3">
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
+          <h2 className={`text-lg sm:text-xl font-semibold ${headingClass}`}>
             Posts
           </h2>
 
-          <div className="h-px flex-1 bg-gray-200" />
+          <div className={`h-px flex-1 ${isDarkTheme ? "bg-[#343843]" : isCustomTheme ? "bg-[#ded8f4]" : "bg-gray-200"}`} />
         </div>
       </div>
 
       {/* Posts */}
       {isPrivateContentHidden ? (
-        <div className="rounded-2xl border border-gray-200 bg-white px-6 py-12 text-center shadow-sm">
+        <div className={`rounded-2xl border ${borderClass} ${panelClass} px-6 py-12 text-center shadow-sm`}>
           <Lock size={36} className="mx-auto text-gray-400" />
 
-          <h3 className="mt-4 text-lg font-semibold text-gray-900">
+          <h3 className={`mt-4 text-lg font-semibold ${headingClass}`}>
             This account is private
           </h3>
 
-          <p className="mt-2 text-sm text-gray-500">
+          <p className={`mt-2 text-sm ${mutedClass}`}>
             Follow this account to see its posts. You'll get access
             after the owner accepts your request.
           </p>
@@ -661,7 +735,7 @@ function UserDetails() {
             .map((post) => (
               <article
                 key={post._id}
-                className="relative rounded-2xl border border-gray-200 bg-white p-4 sm:p-5 shadow-sm transition hover:shadow-md"
+                className={`relative rounded-2xl border ${borderClass} ${panelClass} p-4 sm:p-5 shadow-sm transition hover:shadow-md`}
               >
                 {/* Post Header */}
                 <div className="flex items-center gap-3 pr-10">
@@ -672,11 +746,11 @@ function UserDetails() {
                   />
 
                   <div className="min-w-0">
-                    <h3 className="truncate text-sm sm:text-base font-semibold text-gray-900">
+                    <h3 className={`truncate text-sm sm:text-base font-semibold ${headingClass}`}>
                       {post?.user?.name}
                     </h3>
 
-                    <p className="text-xs sm:text-sm text-gray-400">
+                    <p className={`text-xs sm:text-sm ${mutedClass}`}>
                       {new Date(post?.createdAt).toLocaleDateString("en-US", {
                         month: "short",
                         day: "numeric",
@@ -700,7 +774,7 @@ function UserDetails() {
 
                 {/* Post Text */}
                 {post?.text && (
-                  <div className="mt-4 text-sm sm:text-base leading-6 text-gray-800">
+                  <div className={`mt-4 text-sm sm:text-base leading-6 ${bodyClass}`}>
                     <p className="whitespace-pre-wrap break-words">
                       {expandedPosts[post._id] ? (
                         renderPostText(post.text, post.mentions || [])
@@ -861,41 +935,6 @@ function UserDetails() {
         </div>
       )}
 
-      {/* Remove Avatar Modal */}
-      {showRemoveModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
-          <div className="w-full max-w-sm rounded-2xl bg-white p-5 sm:p-6 shadow-2xl">
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
-              Remove Avatar
-            </h2>
-
-            <p className="mt-2 text-sm sm:text-base leading-6 text-gray-500">
-              Are you sure you want to remove your avatar?
-            </p>
-
-            <div className="mt-6 flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3">
-              <button
-                type="button"
-                onClick={() => setShowRemoveModal(false)}
-                className="w-full sm:w-auto rounded-full border border-gray-300 px-5 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-100"
-              >
-                Cancel
-              </button>
-
-              <button
-                type="button"
-                onClick={async () => {
-                  setShowRemoveModal(false);
-                  await handleRemoveAvatar();
-                }}
-                className="w-full sm:w-auto rounded-full bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-red-700"
-              >
-                Remove
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
       {selectedImage && (
         <ImageViewer
           src={selectedImage}

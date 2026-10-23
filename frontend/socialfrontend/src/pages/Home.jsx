@@ -61,6 +61,8 @@ function Home() {
     }
   }, [location.state, navigate]);
 
+  
+
   return (
     <div className="min-w-0 w-full px-3 pt-16 pb-20 md:px-4 md:pt-6 md:pb-6">
       <div className="mx-auto w-full max-w-3xl">
