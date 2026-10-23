@@ -66,24 +66,24 @@ export async function getMeApi() {
 
 
 // UPDATE MY PROFILE
-export async function updateMyProfile(payload) {
-  const res = await fetch(`${API}/me/profile`, {
+export const updateMyProfile = async (profileData) => {
+  const response = await fetch(`${API}/me/profile`, {
     method: "PUT",
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
     },
-    credentials: "include",
-    body: JSON.stringify(payload),
+    body: JSON.stringify(profileData),
   });
 
-  const data = await res.json();
+  const data = await response.json();
 
-  if (!res.ok) {
-    throw new Error(data.error || "Failed to update profile");
+  if (!response.ok) {
+    throw new Error(data.message || "Profile update failed.");
   }
 
   return data;
-}
+};
 
 
 // GET ANY USER PROFILE
