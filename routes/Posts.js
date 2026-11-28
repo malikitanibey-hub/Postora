@@ -67,7 +67,7 @@ async function createMentionNotifications({ mentions, senderId, post, io }) {
       const populatedNotification = await Notification.findById(
         notification._id,
       )
-        .populate("sender", "name avatar")
+        .populate("sender", "name username avatar")
         .populate({
           path: "post",
           select: "text user",
@@ -254,7 +254,7 @@ router.get("/", authMiddleware, async (req, res) => {
         user: { $in: visibleAuthorIds },
       })
         .populate("user", "name avatar")
-        .populate("mentions.user", "name avatar")
+        .populate("mentions.user", "name username avatar")
         .sort({ createdAt: -1 }),
 
       User.findById(userId).select("savedPosts"),
@@ -539,7 +539,7 @@ router.post("/like/:id", authMiddleware, async (req, res) => {
         const populatedNotification = await Notification.findById(
           notification._id,
         )
-          .populate("sender", "name avatar")
+          .populate("sender", "name username avatar")
           .populate("post", "text")
           .populate("comment", "text");
 

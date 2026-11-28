@@ -403,7 +403,7 @@ router.get("/mention-users", authMiddleware, async (req, res) => {
 
     const users = await User.find({
       _id: { $in: [...userIds] },
-    }).select("_id name avatar");
+    }).select("_id name username avatar");
 
     return res.json(users);
   } catch (error) {

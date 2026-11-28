@@ -127,7 +127,7 @@ function WhatHappening() {
     return mentionUsers.filter(
       (person) =>
         getId(person) !== getId(user) &&
-        person.name?.toLowerCase().includes(query)
+        person.username?.toLowerCase().includes(query)
     );
   };
 
@@ -218,7 +218,7 @@ function WhatHappening() {
 
     const before = text.slice(0, mentionState.start);
     const after = text.slice(mentionState.end);
-    const mentionText = `@${person.name}`;
+    const mentionText = `@${person.username}`;
     const insertedText = `${mentionText} `;
     const start = before.length;
     const end = start + mentionText.length;
@@ -385,8 +385,14 @@ function WhatHappening() {
                         className="h-9 w-9 rounded-full object-cover"
                       />
 
-                      <span className="truncate text-sm font-medium text-gray-800">
-                        {person.name}
+                      <span className="flex min-w-0 flex-col">
+                        <span className="truncate text-sm font-medium text-gray-800">
+                          {person.name}
+                        </span>
+
+                        <span className="truncate text-xs text-gray-500">
+                          @{person.username}
+                        </span>
                       </span>
                     </button>
                   ))
@@ -464,16 +470,16 @@ function WhatHappening() {
                   aria-label="Add emoji"
                   onClick={() => setShowEmojiPicker((prev) => !prev)}
                   className={`flex h-9 w-9 items-center justify-center rounded-full transition ${showEmojiPicker
-                      ? isDarkTheme
-                        ? "bg-white text-[#2764de]"
-                        : isCustomTheme
-                          ? "bg-[#e2dcf7] text-[#2764de]"
-                          : "bg-blue-50 text-[#2764de]"
-                      : isDarkTheme
-                        ? "text-[#2764de] hover:bg-white"
-                        : isCustomTheme
-                          ? "text-[#2764de] hover:bg-[#e2dcf7] hover:text-[#2764de]"
-                          : "text-[#2764de] hover:bg-blue-50"
+                    ? isDarkTheme
+                      ? "bg-white text-[#2764de]"
+                      : isCustomTheme
+                        ? "bg-[#e2dcf7] text-[#2764de]"
+                        : "bg-blue-50 text-[#2764de]"
+                    : isDarkTheme
+                      ? "text-[#2764de] hover:bg-white"
+                      : isCustomTheme
+                        ? "text-[#2764de] hover:bg-[#e2dcf7] hover:text-[#2764de]"
+                        : "text-[#2764de] hover:bg-blue-50"
                     }`}
                 >
                   <Smile size={19} />

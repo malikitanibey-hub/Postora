@@ -6,6 +6,17 @@ const userSchema = new mongoose.Schema({
     type: String,
   },
 
+  username: {
+  type: String,
+  unique: true,
+  sparse: true,
+  lowercase: true,
+  trim: true,
+  minlength: 3,
+  maxlength: 20,
+  match: /^[a-z0-9_]+$/,
+},
+
   bio: {
     type: String,
     default: "",

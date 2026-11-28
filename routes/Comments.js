@@ -45,6 +45,7 @@ async function createMentionNotifications({
   senderId,
   post,
   comment,
+  replyId,
   io,
 }) {
   if (!Array.isArray(mentions) || mentions.length === 0) return;
@@ -68,12 +69,13 @@ async function createMentionNotifications({
         type: "mention",
         post: post._id,
         comment: comment._id,
+        ...(replyId && { reply: replyId }),
       });
 
       const populatedNotification = await Notification.findById(
         notification._id,
       )
-        .populate("sender", "name avatar")
+        .populate("sender", "name username avatar")
         .populate({
           path: "post",
           select: "text user",
@@ -85,10 +87,7 @@ async function createMentionNotifications({
         .populate("comment", "text");
 
       if (io) {
-        io.to(`user:${userId}`).emit(
-          "notification:new",
-          populatedNotification,
-        );
+        io.to(`user:${userId}`).emit("notification:new", populatedNotification);
       }
     }
   } catch (error) {
@@ -177,25 +176,25 @@ router.post("/:postId", authMiddleware, async (req, res) => {
       });
     }
 
-const comment = new Comments({
-  text: text.trim(),
-  mentions,
-  user: req.user.id,
-  post: post._id,
-});
+    const comment = new Comments({
+      text: text.trim(),
+      mentions,
+      user: req.user.id,
+      post: post._id,
+    });
 
     await comment.save();
 
     // Populate the comment author.
-    await comment.populate("user", "name avatar");
+    await comment.populate("user", "name username avatar");
 
-await createMentionNotifications({
-  mentions: comment.mentions,
-  senderId: req.user.id,
-  post,
-  comment,
-  io: req.app.get("io"),
-});
+    await createMentionNotifications({
+      mentions: comment.mentions,
+      senderId: req.user.id,
+      post,
+      comment,
+      io: req.app.get("io"),
+    });
 
     // Notify the post owner if someone else commented.
     if (post.user.toString() !== req.user.id.toString()) {
@@ -212,7 +211,7 @@ await createMentionNotifications({
       const populatedNotification = await Notification.findById(
         notification._id,
       )
-        .populate("sender", "name avatar")
+       .populate("sender", "name username avatar")
         .populate("post", "text")
         .populate("comment", "text");
 
@@ -247,16 +246,16 @@ router.get("/:postId", authMiddleware, async (req, res) => {
       });
     }
 
-const comments = await Comments.find({ post: post._id })
-  .populate("user", "name avatar")
-  .populate("mentions.user", "name avatar")
-  .populate("replies.user", "name avatar")
-  .populate("replies.mentions.user", "name avatar")
-  .populate("replies.replies.user", "name avatar")
-  .populate("replies.replies.mentions.user", "name avatar")
-  .populate("replies.replies.replies.user", "name avatar")
-  .populate("replies.replies.replies.mentions.user", "name avatar")
-  .sort({ createdAt: -1 });
+    const comments = await Comments.find({ post: post._id })
+      .populate("user", "name username avatar")
+      .populate("mentions.user", "name username avatar")
+      .populate("replies.user", "name username avatar")
+      .populate("replies.mentions.user", "name username avatar")
+      .populate("replies.replies.user", "name username avatar")
+      .populate("replies.replies.mentions.user", "name username avatar")
+      .populate("replies.replies.replies.user", "name username avatar")
+      .populate("replies.replies.replies.mentions.user", "name username avatar")
+      .sort({ createdAt: -1 });
 
     return res.json(comments);
   } catch (error) {
@@ -294,23 +293,24 @@ router.post("/reply/:commentId", authMiddleware, async (req, res) => {
 
     const commentOwnerId = comment.user.toString();
 
-comment.replies.push({
-  user: req.user.id,
-  text: text.trim(),
-  mentions,
-});
+    comment.replies.push({
+      user: req.user.id,
+      text: text.trim(),
+      mentions,
+    });
 
     await comment.save();
 
-const addedReply = comment.replies[comment.replies.length - 1];
+    const addedReply = comment.replies[comment.replies.length - 1];
 
-await createMentionNotifications({
-  mentions: addedReply.mentions,
-  senderId: req.user.id,
-  post,
-  comment,
-  io: req.app.get("io"),
-});
+    await createMentionNotifications({
+      mentions: addedReply.mentions,
+      senderId: req.user.id,
+      post,
+      comment,
+      replyId: addedReply._id,
+      io: req.app.get("io"),
+    });
 
     // Notify the comment owner if someone else replied.
     if (commentOwnerId !== req.user.id.toString()) {
@@ -327,7 +327,7 @@ await createMentionNotifications({
       const populatedNotification = await Notification.findById(
         notification._id,
       )
-        .populate("sender", "name avatar")
+        .populate("sender", "name username avatar")
         .populate("post", "text")
         .populate("comment", "text");
 
@@ -341,8 +341,8 @@ await createMentionNotifications({
       }
     }
 
-    await comment.populate("user", "name avatar");
-    await comment.populate("replies.user", "name avatar");
+    await comment.populate("user", "name username avatar");
+    await comment.populate("replies.user", "name username avatar");
 
     return res.json(comment);
   } catch (error) {
@@ -393,22 +393,22 @@ router.post(
         ? parentReply.user._id.toString()
         : parentReply.user.toString();
 
-parentReply.replies.push({
-  user: req.user.id,
-  text: text.trim(),
-  mentions,
-});
+      parentReply.replies.push({
+        user: req.user.id,
+        text: text.trim(),
+        mentions,
+      });
 
       await comment.save();
 
-const addedReply =
-  parentReply.replies[parentReply.replies.length - 1];
+      const addedReply = parentReply.replies[parentReply.replies.length - 1];
 
 await createMentionNotifications({
   mentions: addedReply.mentions,
   senderId: req.user.id,
   post,
   comment,
+  replyId: addedReply._id,
   io: req.app.get("io"),
 });
 
@@ -424,7 +424,7 @@ await createMentionNotifications({
         const populatedNotification = await Notification.findById(
           notification._id,
         )
-          .populate("sender", "name avatar")
+          .populate("sender", "name username avatar")
           .populate("post", "text")
           .populate("comment", "text");
 
@@ -438,8 +438,8 @@ await createMentionNotifications({
         }
       }
 
-      await comment.populate("user", "name avatar");
-      await comment.populate("replies.user", "name avatar");
+      await comment.populate("user", "name username avatar");
+      await comment.populate("replies.user", "name username avatar");
 
       return res.status(201).json(comment);
     } catch (error) {
@@ -494,7 +494,7 @@ router.post("/:commentId/like", authMiddleware, async (req, res) => {
       const populatedNotification = await Notification.findById(
         notification._id,
       )
-        .populate("sender", "name avatar")
+        .populate("sender", "name username avatar")
         .populate("post", "text")
         .populate("comment", "text");
 
@@ -572,7 +572,7 @@ router.post(
         const populatedNotification = await Notification.findById(
           notification._id,
         )
-          .populate("sender", "name avatar")
+          .populate("sender", "name username avatar")
           .populate("post", "text")
           .populate("comment", "text");
 
@@ -619,11 +619,7 @@ router.get("/count/:postId", authMiddleware, async (req, res) => {
     // Count every reply recursively.
     const countReplies = (replies = []) => {
       return replies.reduce((total, reply) => {
-        return (
-          total +
-          1 +
-          countReplies(reply.replies || [])
-        );
+        return total + 1 + countReplies(reply.replies || []);
       }, 0);
     };
 

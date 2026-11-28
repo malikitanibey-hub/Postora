@@ -511,13 +511,12 @@ function UserDetails() {
   if (!profile) {
     return (
       <div
-        className={`flex min-h-[60vh] w-full flex-col items-center justify-center gap-6 px-4 ${
-          isDarkTheme
+        className={`flex min-h-[60vh] w-full flex-col items-center justify-center gap-6 px-4 ${isDarkTheme
             ? "bg-[#111318]"
             : isCustomTheme
               ? "bg-[#f5f3ff]"
               : "bg-gray-50"
-        }`}
+          }`}
         role="status"
         aria-live="polite"
         aria-label="Loading profile"
@@ -530,31 +529,28 @@ function UserDetails() {
 
         <div className="relative flex h-10 w-10 items-center justify-center">
           <span
-            className={`absolute inset-0 rounded-full border-[3px] ${
-              isDarkTheme
+            className={`absolute inset-0 rounded-full border-[3px] ${isDarkTheme
                 ? "border-[#343843]"
                 : isCustomTheme
                   ? "border-[#ded8f4]"
                   : "border-gray-200"
-            }`}
+              }`}
           />
           <span
-            className={`absolute inset-0 animate-spin rounded-full border-[3px] border-transparent ${
-              isCustomTheme
+            className={`absolute inset-0 animate-spin rounded-full border-[3px] border-transparent ${isCustomTheme
                 ? "border-t-[#6554c0]"
                 : "border-t-[#2764de]"
-            }`}
+              }`}
           />
         </div>
 
         <span
-          className={`text-sm font-medium tracking-wide ${
-            isDarkTheme
+          className={`text-sm font-medium tracking-wide ${isDarkTheme
               ? "text-[#9ca3af]"
               : isCustomTheme
                 ? "text-[#77718f]"
                 : "text-gray-500"
-          }`}
+            }`}
         >
           Loading profile...
         </span>
@@ -607,10 +603,20 @@ function UserDetails() {
               className="h-[72px] w-[72px] shrink-0 rounded-full object-cover"
             />
             <div className="min-w-0 flex-1">
-              <h1 className={`truncate text-xl sm:text-2xl font-bold ${headingClass}`}>
+              {/* Name */}
+              <h1 className={`break-words text-xl font-bold tracking-tight sm:text-2xl ${headingClass}`}>
                 {profile?.name}
               </h1>
-              <span className={`mt-1 block truncate text-sm sm:text-base ${mutedClass}`}>
+
+              {/* Username */}
+              {profile?.username && (
+                <p className={`mt-1 text-sm font-medium ${mutedClass}`}>
+                  @{profile.username}
+                </p>
+              )}
+
+              {/* Email */}
+              <span className={`mt-2 block truncate text-sm ${mutedClass}`}>
                 {profile?.email}
               </span>
               <p className={`mt-3 whitespace-pre-wrap break-words text-sm sm:text-base ${profile?.bio ? bodyClass : mutedClass}`}>
@@ -669,11 +675,10 @@ function UserDetails() {
                   type="button"
                   onClick={handleFollowToggle}
                   disabled={followLoading}
-                  className={`inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${
-                    followStatus.isFollowing
+                  className={`inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60 ${followStatus.isFollowing
                       ? `border ${borderClass} ${panelClass} ${hoverClass}`
                       : "bg-[#2764de] text-white hover:bg-blue-700"
-                  }`}
+                    }`}
                 >
                   {followStatus.isFollowing ? <UserCheck size={18} /> : <UserPlus size={18} />}
                   {followLoading

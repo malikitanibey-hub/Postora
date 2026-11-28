@@ -158,19 +158,16 @@ function Notifications() {
 
 
   const getMessage = (notification) => {
-    if (notification.type === "follow_request") {
-      return "requested to follow you";
-    }
-
-    if (notification.type === "follow_accepted") {
-      return "accepted your follow request";
-    }
-
-    if (notification.type === "new_follower") {
-      return "started following you";
-    }
-
     switch (notification.type) {
+      case "follow_request":
+        return "requested to follow you";
+
+      case "follow_accepted":
+        return "accepted your follow request";
+
+      case "new_follower":
+        return "started following you";
+
       case "like":
         return "liked your post";
 
@@ -187,9 +184,7 @@ function Notifications() {
         return "liked your reply";
 
       case "mention":
-        return notification.comment
-          ? "mentioned you in a comment or reply"
-          : "mentioned you in a post";
+        return "mentioned you";
 
       default:
         return "interacted with your content";
@@ -311,13 +306,15 @@ function Notifications() {
 
                 <div className="min-w-0 flex-1">
                   <p className="text-sm leading-6">
-                    <Link
-                      to={sender?._id ? `/userDetails/${sender._id}` : "/"}
-                      onClick={(event) => event.stopPropagation()}
-                      className="font-bold hover:underline"
-                    >
-                      {sender?.name || "Someone"}
-                    </Link>{" "}
+                    <div className="inline-flex flex-col align-middle">
+                      <Link
+                        to={sender?._id ? `/userDetails/${sender._id}` : "/"}
+                        onClick={(event) => event.stopPropagation()}
+                        className="font-bold hover:underline"
+                      >
+                        {sender?.name || "Someone"}
+                      </Link>
+                    </div>{" "}
                     {getMessage(notification)}
                   </p>
 
@@ -353,10 +350,10 @@ function Notifications() {
                         disabled={processingRequest === notification._id}
                         onClick={() => handleFollowRequest(notification, "reject")}
                         className={`rounded-lg border px-4 py-2 text-sm font-semibold transition-colors disabled:opacity-50 ${isDarkTheme
-                            ? "border-[#454a57] text-gray-200 hover:bg-[#292d36]"
-                            : isCustomTheme
-                              ? "border-[#ded8f4] text-[#373064] hover:bg-[#e2dcf7]"
-                              : "border-gray-300 text-gray-700 hover:bg-gray-100"
+                          ? "border-[#454a57] text-gray-200 hover:bg-[#292d36]"
+                          : isCustomTheme
+                            ? "border-[#ded8f4] text-[#373064] hover:bg-[#e2dcf7]"
+                            : "border-gray-300 text-gray-700 hover:bg-gray-100"
                           }`}
                       >
                         Reject

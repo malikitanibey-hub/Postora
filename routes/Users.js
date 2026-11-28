@@ -16,6 +16,25 @@ const router = express.Router();
 
 const upload = multer({ storage: multer.memoryStorage() });
 
+// Generate a unique username from a user's name.
+async function generateUsername(name) {
+  const base =
+    (name || "user")
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, "")
+      .slice(0, 16) || "user";
+
+  let username = base;
+  let counter = 1;
+
+  while (await User.exists({ username })) {
+    username = `${base}${counter}`;
+    counter++;
+  }
+
+  return username;
+}
+
 function setAuthCookie(res, token) {
   res.cookie("token", token, {
     httpOnly: true,
@@ -69,7 +88,13 @@ router.post("/register", async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = new User({ name, email, password: hashedPassword });
+    const username = await generateUsername(name);
+    const user = new User({
+      name,
+      username,
+      email,
+      password: hashedPassword,
+    });
     await user.save();
 
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
@@ -120,7 +145,12 @@ router.post("/login", async (req, res) => {
     res.status(201).json({
       message: "User Logged in Successfully",
       token,
-      user: { id: user._id, name: user.name, email: user.email },
+      user: {
+        id: user._id,
+        name: user.name,
+        username: user.username,
+        email: user.email,
+      },
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -400,11 +430,11 @@ router.get("/me/profile", authMiddleware, async (req, res) => {
   }
 });
 
-
-// UPDATE MY PROFILE NAME AND BIO
+// UPDATE MY PROFILE NAME, USERNAME AND BIO
 router.put("/me/profile", authMiddleware, async (req, res) => {
   try {
     const name = req.body.name?.trim();
+    const username = req.body.username?.trim().toLowerCase();
     const bio = req.body.bio?.trim() ?? "";
 
     if (!name) {
@@ -419,15 +449,100 @@ router.put("/me/profile", authMiddleware, async (req, res) => {
       });
     }
 
+    if (!username || !/^[a-z][a-z0-9_]{2,19}$/.test(username)) {
+      return res.status(400).json({
+        error:
+          "Username must be 3-20 characters, start with a letter, and contain only letters, numbers, or underscores",
+      });
+    }
+
     if (bio.length > 160) {
       return res.status(400).json({
         error: "Bio cannot exceed 160 characters",
       });
     }
 
+    const existingUser = await User.findOne({
+      username,
+      _id: { $ne: req.user.id },
+    });
+
+    if (existingUser) {
+      return res.status(409).json({
+        error: "Username is already taken",
+      });
+    }
+
     const updatedUser = await User.findByIdAndUpdate(
       req.user.id,
-      { $set: { name, bio } },
+      {
+        $set: { name, username, bio },
+      },
+      {
+        new: true,
+        runValidators: true,
+      }
+    ).select(
+      "-password -resetPasswordCode -resetPasswordCodeExpires -resetPasswordPurpose"
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({
+        error: "User not found",
+      });
+    }
+
+    return res.json({
+      message: "Profile updated successfully",
+      user: updatedUser,
+    });
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(409).json({
+        error: "Username is already taken",
+      });
+    }
+
+    console.error("Update profile error:", error);
+
+    return res.status(500).json({
+      error: "Failed to update profile",
+    });
+  }
+});
+
+// UPDATE USERNAME
+router.put("/me/username", authMiddleware, async (req, res) => {
+  try {
+    const username = req.body.username?.trim().toLowerCase();
+
+    if (!username) {
+      return res.status(400).json({
+        error: "Username is required",
+      });
+    }
+
+    if (!/^[a-z][a-z0-9_]{2,19}$/.test(username)) {
+      return res.status(400).json({
+        error:
+          "Username must be 3-20 characters, start with a letter, and contain only letters, numbers, or underscores",
+      });
+    }
+
+    const existingUser = await User.findOne({
+      username,
+      _id: { $ne: req.user.id },
+    });
+
+    if (existingUser) {
+      return res.status(409).json({
+        error: "Username is already taken",
+      });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      req.user.id,
+      { $set: { username } },
       { new: true, runValidators: true },
     ).select(
       "-password -resetPasswordCode -resetPasswordCodeExpires -resetPasswordPurpose",
@@ -439,12 +554,21 @@ router.put("/me/profile", authMiddleware, async (req, res) => {
       });
     }
 
-    res.json(updatedUser);
+    return res.json({
+      message: "Username updated successfully",
+      user: updatedUser,
+    });
   } catch (error) {
-    console.error("Update profile error:", error);
+    if (error.code === 11000) {
+      return res.status(409).json({
+        error: "Username is already taken",
+      });
+    }
 
-    res.status(500).json({
-      error: "Failed to update profile",
+    console.error("Update username error:", error);
+
+    return res.status(500).json({
+      error: "Failed to update username",
     });
   }
 });
@@ -538,8 +662,10 @@ router.get("/google/callback", async (req, res) => {
 
     // Create a new user if one doesn't exist
     if (!user) {
+      const username = await generateUsername(googleName || "Google User");
       user = new User({
         name: googleName || "Google User",
+        username,
         email: googleEmail,
         password: null,
         authProvider: "google",
@@ -583,9 +709,12 @@ router.get("/search", authMiddleware, async (req, res) => {
 
     const users = await User.find({
       _id: { $ne: req.user.id },
-      name: { $regex: escapedQuery, $options: "i" },
+      $or: [
+        { name: { $regex: escapedQuery, $options: "i" } },
+        { username: { $regex: escapedQuery, $options: "i" } },
+      ],
     })
-      .select("_id name avatar")
+      .select("_id name username avatar")
       .sort({ name: 1 })
       .limit(20);
 
@@ -863,7 +992,7 @@ router.delete("/me", authMiddleware, async (req, res) => {
 router.get("/:id", async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select(
-      "name bio avatar isPrivate createdAt",
+      "name username bio avatar isPrivate createdAt",
     );
 
     if (!user) {
@@ -903,6 +1032,8 @@ router.get("/:id", async (req, res) => {
     return res.json({
       _id: user._id,
       name: user.name,
+      username: user.username,
+      email: user.email,
       bio: user.bio || "",
       avatar: user.avatar,
       isPrivate: Boolean(user.isPrivate),

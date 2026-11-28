@@ -473,10 +473,10 @@ function Search() {
                 <Link
                   to={profileUrl}
                   className={`flex w-56 items-center gap-3 rounded-xl border p-3 text-left shadow-xl ${isDarkTheme
-                      ? "border-[#343843] bg-[#1b1e25]"
-                      : isCustomTheme
-                        ? "border-[#ded8f4] bg-white"
-                        : "border-gray-200 bg-white"
+                    ? "border-[#343843] bg-[#1b1e25]"
+                    : isCustomTheme
+                      ? "border-[#ded8f4] bg-white"
+                      : "border-gray-200 bg-white"
                     }`}
                 >
                   <img
@@ -535,7 +535,7 @@ function Search() {
             onChange={(event) => setQuery(event.target.value)}
             placeholder={
               activeTab === "people"
-                ? "Search people by name..."
+                ? "Search people by name or username..."
                 : "Search posts by keywords..."
             }
             aria-label={
@@ -550,10 +550,10 @@ function Search() {
               onClick={() => setQuery("")}
               aria-label="Clear search"
               className={`rounded-full p-1 transition ${isDarkTheme
-                  ? "text-gray-400 hover:bg-[#343843] hover:text-white"
-                  : isCustomTheme
-                    ? "text-[#77708e] hover:bg-[#ede9fe]"
-                    : "text-gray-400 hover:bg-gray-200 hover:text-gray-700"
+                ? "text-gray-400 hover:bg-[#343843] hover:text-white"
+                : isCustomTheme
+                  ? "text-[#77708e] hover:bg-[#ede9fe]"
+                  : "text-gray-400 hover:bg-gray-200 hover:text-gray-700"
                 }`}
             >
               <X size={18} />
@@ -599,17 +599,17 @@ function Search() {
 
             <p className={`mt-2 max-w-sm text-sm leading-6 ${emptyTextClass}`}>
               {activeTab === "people"
-                ? "Search for people on Postora by entering their name."
+                ? "Search for people on Postora by entering their name or username."
                 : "Search for posts by entering words or phrases."}
             </p>
           </div>
         ) : loading ? (
           <div
             className={`flex min-h-[60vh] w-full flex-col items-center justify-center gap-6 px-4 ${isDarkTheme
-                ? "bg-[#111318]"
-                : isCustomTheme
-                  ? "bg-[#f5f3ff]"
-                  : "bg-gray-50"
+              ? "bg-[#111318]"
+              : isCustomTheme
+                ? "bg-[#f5f3ff]"
+                : "bg-gray-50"
               }`}
             role="status"
             aria-live="polite"
@@ -624,27 +624,27 @@ function Search() {
             <div className="relative flex h-10 w-10 items-center justify-center">
               <span
                 className={`absolute inset-0 rounded-full border-[3px] ${isDarkTheme
-                    ? "border-[#343843]"
-                    : isCustomTheme
-                      ? "border-[#ded8f4]"
-                      : "border-gray-200"
+                  ? "border-[#343843]"
+                  : isCustomTheme
+                    ? "border-[#ded8f4]"
+                    : "border-gray-200"
                   }`}
               />
 
               <span
                 className={`absolute inset-0 animate-spin rounded-full border-[3px] border-transparent ${isCustomTheme
-                    ? "border-t-[#6554c0]"
-                    : "border-t-[#2764de]"
+                  ? "border-t-[#6554c0]"
+                  : "border-t-[#2764de]"
                   }`}
               />
             </div>
 
             <span
               className={`text-sm font-medium tracking-wide ${isDarkTheme
-                  ? "text-[#9ca3af]"
-                  : isCustomTheme
-                    ? "text-[#77718f]"
-                    : "text-gray-500"
+                ? "text-[#9ca3af]"
+                : isCustomTheme
+                  ? "text-[#77718f]"
+                  : "text-gray-500"
                 }`}
             >
               Searching...
@@ -668,10 +668,10 @@ function Search() {
                 <div
                   key={person._id}
                   className={`flex items-center gap-3 rounded-xl px-2 py-4 transition ${isDarkTheme
-                      ? "hover:bg-[#1b1e25]"
-                      : isCustomTheme
-                        ? "hover:bg-[#ede9fe]"
-                        : "hover:bg-blue-50"
+                    ? "hover:bg-[#1b1e25]"
+                    : isCustomTheme
+                      ? "hover:bg-[#ede9fe]"
+                      : "hover:bg-blue-50"
                     }`}
                 >
                   <button
@@ -689,8 +689,9 @@ function Search() {
                       <p className={`truncate font-semibold ${headerTitleClass}`}>
                         {person.name || "Postora User"}
                       </p>
-                      <p className={`mt-1 text-sm ${headerSubtitleClass}`}>
-                        View profile
+
+                      <p className={`mt-1 truncate text-sm ${headerSubtitleClass}`}>
+                        @{person.username}
                       </p>
                     </div>
                   </button>
@@ -701,12 +702,12 @@ function Search() {
                       disabled={!!followLoading[person._id]}
                       onClick={() => handleFollowToggle(person)}
                       className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-2 text-sm font-semibold transition disabled:opacity-50 ${followStatuses[person._id]
-                          ? isDarkTheme
-                            ? "border-[#343843] bg-[#1b1e25] text-gray-200 hover:text-red-400"
-                            : isCustomTheme
-                              ? "border-[#ded8f4] bg-white text-[#292344] hover:text-red-600"
-                              : "border-gray-200 bg-white text-gray-700 hover:border-red-200 hover:text-red-600"
-                          : "border-[#2764de] bg-[#2764de] text-white hover:bg-blue-700"
+                        ? isDarkTheme
+                          ? "border-[#343843] bg-[#1b1e25] text-gray-200 hover:text-red-400"
+                          : isCustomTheme
+                            ? "border-[#ded8f4] bg-white text-[#292344] hover:text-red-600"
+                            : "border-gray-200 bg-white text-gray-700 hover:border-red-200 hover:text-red-600"
+                        : "border-[#2764de] bg-[#2764de] text-white hover:bg-blue-700"
                         }`}
                     >
                       {followStatuses[person._id] ? (
@@ -780,12 +781,12 @@ function Search() {
                           disabled={!!followLoading[post.user._id]}
                           onClick={() => handleFollowToggle(post.user)}
                           className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition disabled:opacity-50 sm:px-4 sm:py-2 ${followStatuses[post.user._id]
-                              ? isDarkTheme
-                                ? "border border-[#343843] bg-[#1b1e25] text-gray-100 hover:bg-[#292d36]"
-                                : isCustomTheme
-                                  ? "border border-[#ded8f4] bg-white text-[#292344] hover:bg-[#f0edfa]"
-                                  : "border border-gray-200 text-gray-700 hover:bg-gray-50"
-                              : "bg-[#2764de] text-white hover:bg-blue-700"
+                            ? isDarkTheme
+                              ? "border border-[#343843] bg-[#1b1e25] text-gray-100 hover:bg-[#292d36]"
+                              : isCustomTheme
+                                ? "border border-[#ded8f4] bg-white text-[#292344] hover:bg-[#f0edfa]"
+                                : "border border-gray-200 text-gray-700 hover:bg-gray-50"
+                            : "bg-[#2764de] text-white hover:bg-blue-700"
                             }`}
                         >
                           {followStatuses[post.user._id] ? (
@@ -840,8 +841,8 @@ function Search() {
                         disabled={!!likingPosts[post._id]}
                         onClick={() => handleLike(post._id)}
                         className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-3 py-2 transition-colors disabled:opacity-50 ${post.isLikedByUser
-                            ? "text-red-500"
-                            : `${actionTextClass} hover:bg-red-50 hover:text-red-500`
+                          ? "text-red-500"
+                          : `${actionTextClass} hover:bg-red-50 hover:text-red-500`
                           }`}
                       >
                         <Heart
@@ -860,8 +861,8 @@ function Search() {
                           }))
                         }
                         className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-3 py-2 transition-colors ${showComments[post._id]
-                            ? "bg-[#2764de]/10 text-[#2764de]"
-                            : `${actionTextClass} hover:bg-[#2764de]/10 hover:text-[#2764de]`
+                          ? "bg-[#2764de]/10 text-[#2764de]"
+                          : `${actionTextClass} hover:bg-[#2764de]/10 hover:text-[#2764de]`
                           }`}
                       >
                         <MessageCircle size={20} />
@@ -873,12 +874,12 @@ function Search() {
                         disabled={!!savingPosts[post._id]}
                         onClick={() => handleSavePost(post._id)}
                         className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-3 py-2 transition-colors disabled:opacity-50 ${post.isSavedByUser
-                            ? isDarkTheme
-                              ? "text-[#7da5ff]"
-                              : isCustomTheme
-                                ? "text-[#6554c0]"
-                                : "text-[#2764de]"
-                            : `${actionTextClass} hover:bg-[#2764de]/10 hover:text-[#2764de]`
+                          ? isDarkTheme
+                            ? "text-[#7da5ff]"
+                            : isCustomTheme
+                              ? "text-[#6554c0]"
+                              : "text-[#2764de]"
+                          : `${actionTextClass} hover:bg-[#2764de]/10 hover:text-[#2764de]`
                           }`}
                         aria-label={post.isSavedByUser ? "Unsave post" : "Save post"}
                       >

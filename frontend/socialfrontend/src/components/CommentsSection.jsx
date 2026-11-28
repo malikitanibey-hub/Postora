@@ -386,11 +386,11 @@ function CommentsSection({
   // Open a reply input and automatically mention the person being replied to.
   const openReplyInput = (inputKey, targetUser) => {
     const isOpening = !showReplyInput[inputKey];
-    const name = targetUser?.name;
+    const username = targetUser?.username;
     const targetId = getId(targetUser);
 
-    if (isOpening && name && targetId) {
-      const mentionText = `@${name}`;
+    if (isOpening && username && targetId) {
+      const mentionText = `@${username}`;
 
       setReplyText((prev) => ({
         ...prev,
@@ -472,7 +472,7 @@ function CommentsSection({
 
     const start = mentionState.start;
     const cursor = mentionState.cursor;
-    const mentionText = `@${person.name}`;
+    const mentionText = `@${person.username}`;
     const insertedText = `${mentionText} `;
 
     const nextText =
@@ -526,13 +526,13 @@ function CommentsSection({
     if (!mentionState) return [];
 
     return mentionUsers
-      .filter((person) => {
-        if (!person?.name || getId(person) === currentUserId) return false;
+.filter((person) => {
+  if (!person?.username || getId(person) === currentUserId) return false;
 
-        return person.name
-          .toLowerCase()
-          .includes(mentionState.query);
-      })
+  return person.username
+    .toLowerCase()
+    .includes(mentionState.query);
+})
       .slice(0, 6);
   };
 
@@ -559,7 +559,7 @@ function CommentsSection({
                 className="h-9 w-9 shrink-0 rounded-full object-cover ring-2 ring-white dark:ring-slate-900"
               />
               <span className="min-w-0 truncate text-sm font-semibold text-slate-800 dark:text-slate-100">
-                {person.name}
+                {person.username}
               </span>
             </button>
           ))
@@ -815,7 +815,7 @@ function CommentsSection({
 
                   <span className="min-w-0">
                     <span className="block truncate text-sm font-bold text-gray-900">
-                      {person.name || mentionText.slice(1)}
+                      {person.username || mentionText.slice(1)}
                     </span>
                     <span className="block text-xs text-gray-500">
                       View profile

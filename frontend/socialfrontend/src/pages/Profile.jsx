@@ -60,8 +60,8 @@ function Profile() {
     const handleThemeChange = (event) => {
       setAppearance(
         event.detail?.appearance ||
-          localStorage.getItem("postoraAppearance") ||
-          "light"
+        localStorage.getItem("postoraAppearance") ||
+        "light"
       );
     };
 
@@ -131,6 +131,7 @@ function Profile() {
   // Profile editing
   const [showEditModal, setShowEditModal] = useState(false);
   const [editName, setEditName] = useState("");
+  const [editUsername, setEditUsername] = useState("");
   const [editBio, setEditBio] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
 
@@ -158,10 +159,10 @@ function Profile() {
       state.map((post) =>
         post._id === postId
           ? {
-              ...post,
-              likes: Array(Math.max(0, likesCount)).fill(null),
-              isLikedByUser: liked,
-            }
+            ...post,
+            likes: Array(Math.max(0, likesCount)).fill(null),
+            isLikedByUser: liked,
+          }
           : post
       )
   );
@@ -195,6 +196,7 @@ function Profile() {
         setProfile(userProfile);
         setPosts(Array.isArray(userPosts) ? userPosts : []);
         setEditName(userProfile?.name || "");
+        setEditUsername(userProfile?.username || "");
         setEditBio(userProfile?.bio || "");
 
         const counts = {};
@@ -334,10 +336,23 @@ function Profile() {
     if (!isOwner || savingProfile) return;
 
     const name = editName.trim();
+    const username = editUsername.trim().toLowerCase();
     const bio = editBio.trim();
 
     if (!name) {
       toast.error("Your name cannot be empty");
+      return;
+    }
+
+    if (name.length > 50) {
+      toast.error("Name cannot exceed 50 characters");
+      return;
+    }
+
+    if (!/^[a-z][a-z0-9_]{2,19}$/.test(username)) {
+      toast.error(
+        "Username must be 3-20 characters, start with a letter, and contain only letters, numbers, or underscores"
+      );
       return;
     }
 
@@ -349,18 +364,26 @@ function Profile() {
     setSavingProfile(true);
 
     try {
-      const data = await updateMyProfile({ name, bio });
+      const data = await updateMyProfile({
+        name,
+        username,
+        bio,
+      });
+
       const updatedProfile = data.user || data.profile || data;
 
       setProfile((previous) => ({
         ...previous,
         ...updatedProfile,
         name: updatedProfile.name ?? name,
+        username: updatedProfile.username ?? username,
         bio: updatedProfile.bio ?? bio,
       }));
 
       setEditName(updatedProfile.name ?? name);
+      setEditUsername(updatedProfile.username ?? username);
       setEditBio(updatedProfile.bio ?? bio);
+
       setShowEditModal(false);
       setShowBioEmojiPicker(false);
 
@@ -471,10 +494,10 @@ function Profile() {
           previous.map((post) =>
             post._id === postId
               ? {
-                  ...post,
-                  likes: Array(data.likesCount).fill(null),
-                  isLikedByUser: data.liked,
-                }
+                ...post,
+                likes: Array(data.likesCount).fill(null),
+                isLikedByUser: data.liked,
+              }
               : post
           )
         );
@@ -483,10 +506,10 @@ function Profile() {
           previous.map((post) =>
             post._id === postId
               ? {
-                  ...post,
-                  likes: Array(currentLikesCount).fill(null),
-                  isLikedByUser: isCurrentlyLiked,
-                }
+                ...post,
+                likes: Array(currentLikesCount).fill(null),
+                isLikedByUser: isCurrentlyLiked,
+              }
               : post
           )
         );
@@ -695,73 +718,69 @@ function Profile() {
     return parts;
   };
 
-if (loading) {
-  return (
-    <div
-      className={`flex min-h-[60vh] w-full flex-col items-center justify-center gap-6 px-4 ${
-        isDarkTheme
+  if (loading) {
+    return (
+      <div
+        className={`flex min-h-[60vh] w-full flex-col items-center justify-center gap-6 px-4 ${isDarkTheme
           ? "bg-[#111318]"
           : isCustomTheme
             ? "bg-[#f5f3ff]"
             : "bg-gray-50"
-      }`}
-      role="status"
-      aria-live="polite"
-      aria-label="Loading profile"
-    >
-      <img
-        src={isDarkTheme ? "/logo.png" : "/logo-1.png"}
-        alt="Postora"
-        className="h-auto w-36 max-w-[55vw] object-contain sm:w-44"
-      />
+          }`}
+        role="status"
+        aria-live="polite"
+        aria-label="Loading profile"
+      >
+        <img
+          src={isDarkTheme ? "/logo.png" : "/logo-1.png"}
+          alt="Postora"
+          className="h-auto w-36 max-w-[55vw] object-contain sm:w-44"
+        />
 
-      <div className="relative flex h-10 w-10 items-center justify-center">
-        <span
-          className={`absolute inset-0 rounded-full border-[3px] ${
-            isDarkTheme
+        <div className="relative flex h-10 w-10 items-center justify-center">
+          <span
+            className={`absolute inset-0 rounded-full border-[3px] ${isDarkTheme
               ? "border-[#343843]"
               : isCustomTheme
                 ? "border-[#ded8f4]"
                 : "border-gray-200"
-          }`}
-        />
+              }`}
+          />
 
-        <span
-          className={`absolute inset-0 animate-spin rounded-full border-[3px] border-transparent ${
-            isCustomTheme
+          <span
+            className={`absolute inset-0 animate-spin rounded-full border-[3px] border-transparent ${isCustomTheme
               ? "border-t-[#6554c0]"
               : "border-t-[#2764de]"
-          }`}
-        />
-      </div>
+              }`}
+          />
+        </div>
 
-      <span
-        className={`text-sm font-medium tracking-wide ${
-          isDarkTheme
+        <span
+          className={`text-sm font-medium tracking-wide ${isDarkTheme
             ? "text-[#9ca3af]"
             : isCustomTheme
               ? "text-[#77718f]"
               : "text-gray-500"
-        }`}
-      >
-        Loading profile...
-      </span>
-    </div>
-  );
-}
+            }`}
+        >
+          Loading profile...
+        </span>
+      </div>
+    );
+  }
 
-if (!profile) {
-  return (
-    <div
-      className={`mx-auto max-w-2xl px-4 py-16 text-center ${pageClass}`}
-    >
-      <p className="text-lg font-semibold">Profile unavailable</p>
-      <p className={`mt-2 text-sm ${bodyClass}`}>
-        We couldn't load your profile.
-      </p>
-    </div>
-  );
-}
+  if (!profile) {
+    return (
+      <div
+        className={`mx-auto max-w-2xl px-4 py-16 text-center ${pageClass}`}
+      >
+        <p className="text-lg font-semibold">Profile unavailable</p>
+        <p className={`mt-2 text-sm ${bodyClass}`}>
+          We couldn't load your profile.
+        </p>
+      </div>
+    );
+  }
 
   const sortedPosts = [...(optimisticPosts || [])].sort(
     (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
@@ -786,13 +805,12 @@ if (!profile) {
 
       {/* Profile header */}
       <div
-        className={`mb-4 mt-6 rounded-xl border p-4 sm:p-6 ${
-          isDarkTheme
-            ? "border-[#343843] bg-[#1b1e25] text-gray-100"
-            : isCustomTheme
-              ? "border-[#ded8f4] bg-white text-[var(--foreground)]"
-              : "border-gray-200 bg-white text-[var(--foreground)]"
-        }`}
+        className={`mb-4 mt-6 rounded-xl border p-4 sm:p-6 ${isDarkTheme
+          ? "border-[#343843] bg-[#1b1e25] text-gray-100"
+          : isCustomTheme
+            ? "border-[#ded8f4] bg-white text-[var(--foreground)]"
+            : "border-gray-200 bg-white text-[var(--foreground)]"
+          }`}
       >
         <section className="mt-6">
           <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
@@ -810,13 +828,12 @@ if (!profile) {
                 <img
                   src={avatarSrc}
                   alt={`${profile.name}'s avatar`}
-                  className={`h-24 w-24 rounded-full object-cover sm:h-28 sm:w-28 ${
-                    isDarkTheme
-                      ? "border-2 border-[#343843]"
-                      : isCustomTheme
-                        ? "border-2 border-[#ded8f4]"
-                        : "border-2 border-gray-200"
-                  }`}
+                  className={`h-24 w-24 rounded-full object-cover sm:h-28 sm:w-28 ${isDarkTheme
+                    ? "border-2 border-[#343843]"
+                    : isCustomTheme
+                      ? "border-2 border-[#ded8f4]"
+                      : "border-2 border-gray-200"
+                    }`}
                 />
 
                 {isOwner && (
@@ -856,13 +873,12 @@ if (!profile) {
                   </button>
 
                   <div
-                    className={`mx-2 my-1 h-px ${
-                      isDarkTheme
-                        ? "bg-[#343843]"
-                        : isCustomTheme
-                          ? "bg-[#ded8f4]"
-                          : "bg-gray-200"
-                    }`}
+                    className={`mx-2 my-1 h-px ${isDarkTheme
+                      ? "bg-[#343843]"
+                      : isCustomTheme
+                        ? "bg-[#ded8f4]"
+                        : "bg-gray-200"
+                      }`}
                   />
 
                   <button
@@ -891,32 +907,44 @@ if (!profile) {
 
             {/* Name and profile information */}
             <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="flex min-w-0 flex-wrap items-center gap-2">
-                  <h1
-                    className={`break-words text-2xl font-bold sm:text-3xl ${headingClass}`}
-                  >
-                    {profile.name}
-                  </h1>
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  {/* Name and privacy status */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h1
+                      className={`break-words text-2xl font-bold tracking-tight sm:text-3xl ${headingClass}`}
+                    >
+                      {profile.name}
+                    </h1>
 
-                  {profile.isPrivate ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-600">
-                      <Lock size={12} />
-                      Private
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600">
-                      <Globe size={12} />
-                      Public
-                    </span>
+                    {profile.isPrivate ? (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2.5 py-1 text-xs font-medium text-amber-600">
+                        <Lock size={12} />
+                        Private
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-600">
+                        <Globe size={12} />
+                        Public
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Username directly under name */}
+                  {profile.username && (
+                    <p className={`mt-1 text-sm font-medium ${bodyClass}`}>
+                      @{profile.username}
+                    </p>
                   )}
                 </div>
 
+                {/* Edit profile button */}
                 {isOwner && (
                   <button
                     type="button"
                     onClick={() => {
                       setEditName(profile.name || "");
+                      setEditUsername(profile.username || "");
                       setEditBio(profile.bio || "");
                       setShowEditAvatarMenu(false);
                       setShowBioEmojiPicker(false);
@@ -954,6 +982,7 @@ if (!profile) {
                   type="button"
                   onClick={() => {
                     setEditName(profile.name || "");
+                    setEditUsername(profile.username || "");
                     setEditBio(profile.bio || "");
                     setShowBioEmojiPicker(false);
                     setShowEditModal(true);
@@ -964,6 +993,7 @@ if (!profile) {
                 </button>
               ) : null}
 
+              {/* Email */}
               <div className={`mt-3 flex items-center gap-1.5 text-sm ${bodyClass}`}>
                 <ShieldCheck size={15} />
                 <span>{displayEmail || "Email unavailable"}</span>
@@ -986,13 +1016,12 @@ if (!profile) {
         {sortedPosts.length === 0 ? (
           <div className={`py-12 text-center ${bodyClass}`}>
             <div
-              className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full ${
-                isDarkTheme
-                  ? "bg-[#1b1e25]"
-                  : isCustomTheme
-                    ? "bg-[#f0edfa]"
-                    : "bg-gray-100"
-              }`}
+              className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full ${isDarkTheme
+                ? "bg-[#1b1e25]"
+                : isCustomTheme
+                  ? "bg-[#f0edfa]"
+                  : "bg-gray-100"
+                }`}
             >
               <FileText size={25} />
             </div>
@@ -1048,13 +1077,13 @@ if (!profile) {
                       <span className="mt-0.5 block text-sm text-gray-500">
                         {post?.createdAt
                           ? new Date(post.createdAt).toLocaleDateString(
-                              "en-US",
-                              {
-                                month: "short",
-                                day: "numeric",
-                                year: "numeric",
-                              }
-                            )
+                            "en-US",
+                            {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            }
+                          )
                           : ""}
                       </span>
                     </div>
@@ -1167,11 +1196,10 @@ if (!profile) {
                     <button
                       type="button"
                       onClick={() => toggleComments(post._id)}
-                      className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-3 py-2 transition-colors hover:bg-blue-50 hover:text-[#2764de] ${
-                        showComments[post._id]
-                          ? "bg-blue-50 text-[#2764de]"
-                          : "text-gray-500"
-                      }`}
+                      className={`inline-flex min-h-10 items-center gap-2 rounded-xl px-3 py-2 transition-colors hover:bg-blue-50 hover:text-[#2764de] ${showComments[post._id]
+                        ? "bg-blue-50 text-[#2764de]"
+                        : "text-gray-500"
+                        }`}
                     >
                       <MessageCircle size={20} />
                       <span>{commentCounts[post._id] || 0}</span>
@@ -1181,11 +1209,10 @@ if (!profile) {
                       type="button"
                       disabled={Boolean(savingPosts[post._id])}
                       onClick={() => handleSavePost(post._id)}
-                      className={`ml-auto inline-flex min-h-10 items-center gap-2 rounded-xl px-3 py-2 transition-colors disabled:opacity-50 ${
-                        post.isSavedByUser
-                          ? "bg-blue-50 text-[#2764de]"
-                          : "text-gray-500 hover:bg-blue-50 hover:text-[#2764de]"
-                      }`}
+                      className={`ml-auto inline-flex min-h-10 items-center gap-2 rounded-xl px-3 py-2 transition-colors disabled:opacity-50 ${post.isSavedByUser
+                        ? "bg-blue-50 text-[#2764de]"
+                        : "text-gray-500 hover:bg-blue-50 hover:text-[#2764de]"
+                        }`}
                       aria-label={
                         post.isSavedByUser ? "Unsave post" : "Save post"
                       }
@@ -1236,13 +1263,12 @@ if (!profile) {
           >
             {/* Modal header */}
             <div
-              className={`flex items-center justify-between border-b px-5 py-4 sm:px-7 ${
-                isDarkTheme
-                  ? "border-[#343843]"
-                  : isCustomTheme
-                    ? "border-[#ded8f4]"
-                    : "border-gray-200"
-              }`}
+              className={`flex items-center justify-between border-b px-5 py-4 sm:px-7 ${isDarkTheme
+                ? "border-[#343843]"
+                : isCustomTheme
+                  ? "border-[#ded8f4]"
+                  : "border-gray-200"
+                }`}
             >
               <h2 className={`text-lg font-bold ${headingClass}`}>
                 Edit profile
@@ -1278,13 +1304,12 @@ if (!profile) {
                     <img
                       src={avatarSrc}
                       alt="Profile avatar preview"
-                      className={`h-24 w-24 rounded-full border-2 object-cover ${
-                        isDarkTheme
-                          ? "border-[#343843]"
-                          : isCustomTheme
-                            ? "border-[#ded8f4]"
-                            : "border-gray-200"
-                      }`}
+                      className={`h-24 w-24 rounded-full border-2 object-cover ${isDarkTheme
+                        ? "border-[#343843]"
+                        : isCustomTheme
+                          ? "border-[#ded8f4]"
+                          : "border-gray-200"
+                        }`}
                     />
 
                     <span className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full bg-[#2764de] text-white shadow-md transition hover:bg-blue-700">
@@ -1323,13 +1348,12 @@ if (!profile) {
                       </button>
 
                       <div
-                        className={`mx-2 my-1 h-px ${
-                          isDarkTheme
-                            ? "bg-[#343843]"
-                            : isCustomTheme
-                              ? "bg-[#ded8f4]"
-                              : "bg-gray-200"
-                        }`}
+                        className={`mx-2 my-1 h-px ${isDarkTheme
+                          ? "bg-[#343843]"
+                          : isCustomTheme
+                            ? "bg-[#ded8f4]"
+                            : "bg-gray-200"
+                          }`}
                       />
 
                       <button
@@ -1376,6 +1400,47 @@ if (!profile) {
                 />
               </div>
 
+              {/* Username */}
+              <div>
+                <label
+                  htmlFor="edit-profile-username"
+                  className={`mb-2 block text-sm font-semibold ${headingClass}`}
+                >
+                  Username
+                </label>
+
+                <div className="relative">
+                  <span
+                    className={`absolute left-4 top-1/2 -translate-y-1/2 text-sm ${bodyClass}`}
+                  >
+                    @
+                  </span>
+
+                  <input
+                    id="edit-profile-username"
+                    type="text"
+                    autoComplete="username"
+                    value={editUsername}
+                    onChange={(event) =>
+                      setEditUsername(
+                        event.target.value
+                          .toLowerCase()
+                          .replace(/[^a-z0-9_]/g, "")
+                      )
+                    }
+                    minLength={3}
+                    maxLength={20}
+                    required
+                    placeholder="your_username"
+                    className={`w-full rounded-xl border py-3 pl-9 pr-4 text-sm outline-none transition ${inputClass}`}
+                  />
+                </div>
+
+                <p className={`mt-1.5 text-xs ${bodyClass}`}>
+                  Your username must be unique and can contain letters, numbers, and underscores.
+                </p>
+              </div>
+
               {/* Bio */}
               <div>
                 <label
@@ -1386,13 +1451,12 @@ if (!profile) {
                 </label>
 
                 <div
-                  className={`relative rounded-xl border transition focus-within:border-[#2764de] ${
-                    isDarkTheme
-                      ? "border-[#343843] bg-[#111318]"
-                      : isCustomTheme
-                        ? "border-[#ded8f4] bg-[#faf9ff]"
-                        : "border-gray-300 bg-white"
-                  }`}
+                  className={`relative rounded-xl border transition focus-within:border-[#2764de] ${isDarkTheme
+                    ? "border-[#343843] bg-[#111318]"
+                    : isCustomTheme
+                      ? "border-[#ded8f4] bg-[#faf9ff]"
+                      : "border-gray-300 bg-white"
+                    }`}
                 >
                   <textarea
                     ref={bioTextareaRef}
@@ -1415,11 +1479,10 @@ if (!profile) {
                       onClick={() =>
                         setShowBioEmojiPicker((previous) => !previous)
                       }
-                      className={`flex h-8 w-8 items-center justify-center rounded-full transition ${
-                        showBioEmojiPicker
-                          ? "bg-blue-50 text-[#2764de]"
-                          : `${bodyClass} ${subtleHoverClass}`
-                      }`}
+                      className={`flex h-8 w-8 items-center justify-center rounded-full transition ${showBioEmojiPicker
+                        ? "bg-blue-50 text-[#2764de]"
+                        : `${bodyClass} ${subtleHoverClass}`
+                        }`}
                     >
                       <Smile size={18} />
                     </button>
@@ -1489,26 +1552,24 @@ if (!profile) {
 
                           {/* X button below the emoji picker */}
                           <div
-                            className={`flex justify-end border-t px-3 py-2 ${
-                              isDarkTheme
-                                ? "border-[#343843] bg-[#111318]"
-                                : isCustomTheme
-                                  ? "border-[#ded8f4] bg-[#faf9ff]"
-                                  : "border-gray-200 bg-white"
-                            }`}
+                            className={`flex justify-end border-t px-3 py-2 ${isDarkTheme
+                              ? "border-[#343843] bg-[#111318]"
+                              : isCustomTheme
+                                ? "border-[#ded8f4] bg-[#faf9ff]"
+                                : "border-gray-200 bg-white"
+                              }`}
                           >
                             <button
                               type="button"
                               onClick={removeLastBioCharacter}
                               aria-label="Remove last character from bio"
                               title="Remove last character"
-                              className={`flex h-8 w-8 items-center justify-center rounded-full transition ${
-                                isDarkTheme
-                                  ? "text-gray-300 hover:bg-[#292d36]"
-                                  : isCustomTheme
-                                    ? "text-[#77708e] hover:bg-[#f0edfa]"
-                                    : "text-gray-700 hover:bg-gray-100"
-                              }`}
+                              className={`flex h-8 w-8 items-center justify-center rounded-full transition ${isDarkTheme
+                                ? "text-gray-300 hover:bg-[#292d36]"
+                                : isCustomTheme
+                                  ? "text-[#77708e] hover:bg-[#f0edfa]"
+                                  : "text-gray-700 hover:bg-gray-100"
+                                }`}
                             >
                               <X size={17} />
                             </button>

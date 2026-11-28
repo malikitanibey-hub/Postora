@@ -11,12 +11,12 @@ import {
 } from "../api/follows";
 
 function NotificationDropdown() {
-const {
-  notifications,
-  unreadCount,
-  fetchNotifications,
-  fetchUnreadCount,
-} = useSocket();
+  const {
+    notifications,
+    unreadCount,
+    fetchNotifications,
+    fetchUnreadCount,
+  } = useSocket();
 
   const [requests, setRequests] = useState([]);
   const [loadingRequests, setLoadingRequests] = useState(false);
@@ -40,30 +40,40 @@ const {
     fetchUnreadCount();
   }, [fetchUnreadCount]);
 
+  // Notification message
+  const getNotificationText = (notification) => {
+    switch (notification.type) {
+      case "follow_request":
+        return "requested to follow you";
 
+      case "follow_accepted":
+        return "accepted your follow request";
 
+      case "new_follower":
+        return "started following you";
 
-const getNotificationText = (notification) => {
-  if (notification.type === "follow_request") {
-    return "requested to follow you";
-  }
+      case "like":
+        return "liked your post";
 
-  if (notification.type === "follow_accepted") {
-    return "accepted your follow request";
-  }
+      case "comment":
+        return "commented on your post";
 
-  switch (notification.type) {
-    case "like":
-      return "liked your post";
-    case "comment":
-      return "commented on your post";
-    case "reply":
-      return "replied to your comment";
-    default:
-      return "interacted with your content";
-  }
-};
+      case "reply":
+        return "replied to your comment";
 
+      case "comment_like":
+        return "liked your comment";
+
+      case "reply_like":
+        return "liked your reply";
+
+      case "mention":
+        return "mentioned you";
+
+      default:
+        return "interacted with your content";
+    }
+  };
 
   const getRequestForNotification = (notification) => {
     return requests.find(
@@ -73,50 +83,47 @@ const getNotificationText = (notification) => {
   };
 
   const handleRequestAction = async (notification, action) => {
-  const request = getRequestForNotification(notification);
+    const request = getRequestForNotification(notification);
 
-  if (!request) {
-    toast.error("This follow request is no longer available.");
-    await loadFollowRequests();
-    return;
-  }
-
-  setProcessingRequest(request._id);
-
-  try {
-    if (action === "accept") {
-      await acceptFollowRequest(request._id);
-      toast.success("Follow request accepted.");
-    } else {
-      await rejectFollowRequest(request._id);
-      toast.success("Follow request rejected.");
+    if (!request) {
+      toast.error("This follow request is no longer available.");
+      await loadFollowRequests();
+      return;
     }
 
-    setRequests((current) =>
-      current.filter((item) => item._id !== request._id)
-    );
+    setProcessingRequest(request._id);
 
-    setDismissedNotifications((current) => [
-      ...current,
-      notification._id,
-    ]);
+    try {
+      if (action === "accept") {
+        await acceptFollowRequest(request._id);
+        toast.success("Follow request accepted.");
+      } else {
+        await rejectFollowRequest(request._id);
+        toast.success("Follow request rejected.");
+      }
 
-    // Refresh once after either action
-    await fetchNotifications();
-    await fetchUnreadCount();
-  } catch (error) {
-    toast.error(error.message || "Failed to update follow request");
-  } finally {
-    setProcessingRequest(null);
-  }
-};
+      setRequests((current) =>
+        current.filter((item) => item._id !== request._id)
+      );
+
+      setDismissedNotifications((current) => [
+        ...current,
+        notification._id,
+      ]);
+
+      await fetchNotifications();
+      await fetchUnreadCount();
+    } catch (error) {
+      toast.error(error.message || "Failed to update follow request");
+    } finally {
+      setProcessingRequest(null);
+    }
+  };
 
   const visibleNotifications = (notifications || []).filter(
     (notification) =>
       !dismissedNotifications.includes(notification._id)
   );
-  console.log("All notifications:", notifications);
-console.log("Visible notifications:", visibleNotifications);
 
   return (
     <Popover.Root
@@ -151,9 +158,9 @@ console.log("Visible notifications:", visibleNotifications);
         >
           {/* Header */}
           <div className="flex items-center justify-between border-b p-4">
-<h3 className="text-lg font-bold text-gray-900">
-  Notifications — TEST 123
-</h3>
+            <h3 className="text-lg font-bold text-gray-900">
+              Notifications
+            </h3>
           </div>
 
           {/* Incoming follow requests */}
@@ -179,6 +186,13 @@ console.log("Visible notifications:", visibleNotifications);
                       <p className="truncate text-sm font-medium text-gray-900">
                         {request.follower?.name || "User"}
                       </p>
+
+                      {request.follower?.username && (
+                        <p className="text-xs text-gray-500">
+                          @{request.follower.username}
+                        </p>
+                      )}
+
                       <p className="text-xs text-gray-500">
                         Wants to follow you
                       </p>
@@ -193,18 +207,20 @@ console.log("Visible notifications:", visibleNotifications);
 
                           try {
                             await acceptFollowRequest(request._id);
+
                             setRequests((current) =>
                               current.filter(
                                 (item) => item._id !== request._id
                               )
                             );
+
                             toast.success("Follow request accepted.");
                             await fetchNotifications();
                             await fetchUnreadCount();
                           } catch (error) {
                             toast.error(
                               error.message ||
-                                "Failed to accept follow request"
+                              "Failed to accept follow request"
                             );
                           } finally {
                             setProcessingRequest(null);
@@ -223,18 +239,20 @@ console.log("Visible notifications:", visibleNotifications);
 
                           try {
                             await rejectFollowRequest(request._id);
+
                             setRequests((current) =>
                               current.filter(
                                 (item) => item._id !== request._id
                               )
                             );
+
                             toast.success("Follow request rejected.");
                             await fetchNotifications();
                             await fetchUnreadCount();
                           } catch (error) {
                             toast.error(
                               error.message ||
-                                "Failed to reject follow request"
+                              "Failed to reject follow request"
                             );
                           } finally {
                             setProcessingRequest(null);
@@ -265,29 +283,14 @@ console.log("Visible notifications:", visibleNotifications);
               </p>
             ) : (
               <div className="space-y-2">
-{visibleNotifications.map((notification) => {
-  console.log("Notification list rendered:", visibleNotifications);
-
-  // const request =
-  //   notification.type === "follow_request"
-  //     ? getRequestForNotification(notification)
-  //     : null;
-
-  console.log(
-    "Displayed notification:",
-    notification.type,
-    notification.sender?.name,
-    notification._id
-  );
-
-  return (
+                {visibleNotifications.map((notification) => {
+                  return (
                     <div
                       key={notification._id}
-                      className={`rounded-lg p-3 ${
-                        notification.read
+                      className={`rounded-lg p-3 ${notification.read
                           ? "bg-white"
                           : "bg-blue-50"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-start gap-3">
                         <img
@@ -299,28 +302,41 @@ console.log("Visible notifications:", visibleNotifications);
                         />
 
                         <div className="min-w-0 flex-1">
-                          <p className="text-sm text-gray-700">
-                            <span className="font-semibold text-gray-900">
+                          {/* Sender name */}
+                          <div className="flex flex-col">
+                            <span className="text-sm font-semibold text-gray-900">
                               {notification.sender?.name || "Someone"}
                             </span>
+                          </div>
+
+                          {/* Notification message */}
+                          <p className="mt-1 text-sm text-gray-700">
                             {getNotificationText(notification)}
                           </p>
 
+                          {/* Post content */}
                           {notification.post?.text && (
                             <p className="mt-1 truncate text-sm text-gray-500">
                               {notification.post.text}
                             </p>
                           )}
 
+                          {/* Comment content */}
+                          {notification.type === "mention" &&
+                            notification.comment?.text && (
+                              <p className="mt-1 truncate text-sm text-gray-500">
+                                {notification.comment.text}
+                              </p>
+                            )}
+
+                          {/* Date */}
                           <p className="mt-1 text-xs text-gray-400">
                             {notification.createdAt
                               ? new Date(
-                                  notification.createdAt
-                                ).toLocaleString()
+                                notification.createdAt
+                              ).toLocaleString()
                               : ""}
                           </p>
-
-                          
                         </div>
                       </div>
                     </div>
